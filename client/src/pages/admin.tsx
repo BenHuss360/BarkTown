@@ -42,6 +42,10 @@ export default function AdminPage() {
     onSuccess: () => {
       // Refetch suggestions to update the list
       refetch();
+      
+      // Also invalidate the locations cache to refresh the main map view
+      queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+      
       toast({
         title: "Status Updated",
         description: "The suggestion status has been updated successfully.",

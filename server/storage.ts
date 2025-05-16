@@ -296,7 +296,7 @@ export class MemStorage implements IStorage {
         longitude: suggestion.longitude || -122.4194,
         rating: 4.0, // Start with a good rating
         reviewCount: 1, // Start with one review
-        imageUrl: suggestion.photoUrl || `https://source.unsplash.com/random/800x600/?${suggestion.category}`,
+        imageUrl: suggestion.photoUrl || "https://images.unsplash.com/photo-1610041321420-a489049a5616?q=80&w=2070",
         features: suggestion.features,
         distanceMiles: 0.5 // Default distance
       };
