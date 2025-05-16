@@ -183,7 +183,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       }
       
+      // Add the review
       const review = await storage.addReview(validationResult.data);
+      
+      // Award 1 paw point to the user for submitting a review
+      const userId = validationResult.data.userId;
+      if (userId) {
+        const user = await storage.getUser(userId);
+        if (user) {
+          const currentPoints = user.pawPoints || 0;
+          await storage.updateUserPoints(userId, currentPoints + 1);
+          console.log(`Awarded 1 paw point to user ${userId} for submitting a review`);
+        }
+      }
+      
       return res.status(201).json(review);
     } catch (error) {
       console.error("Error creating review:", error);
