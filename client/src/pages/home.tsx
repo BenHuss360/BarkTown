@@ -48,15 +48,15 @@ export default function Home() {
     <div className="flex flex-col h-full">
       <LocationHeader onAccessibilityClick={() => {}} />
       
-      <div className="px-4 py-2">
+      <div className="px-4 py-2 bg-background sticky top-0 z-50">
         <SearchBar onSearch={handleSearch} />
-      </div>
       
-      <div className="px-4 pb-2 overflow-x-auto">
-        <CategoryFilters 
-          selectedCategory={selectedCategory} 
-          onSelectCategory={handleCategorySelect} 
-        />
+        <div className="pt-2 pb-2 overflow-x-auto">
+          <CategoryFilters 
+            selectedCategory={selectedCategory} 
+            onSelectCategory={handleCategorySelect} 
+          />
+        </div>
       </div>
       
       {viewMode === "map" ? (
@@ -76,8 +76,8 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <div className="relative flex-1" style={{ height: "calc(100vh - 148px)" }}>
-          <div className="sticky top-0 pt-4 pr-4 z-50 flex justify-end">
+        <div className="relative flex-1" style={{ height: "calc(100vh - 205px)" }}>
+          <div className="sticky top-0 pt-2 pr-4 z-40 flex justify-end bg-background">
             <button 
               onClick={toggleViewMode}
               aria-label="Switch to map view"
@@ -86,7 +86,7 @@ export default function Home() {
               Map View
             </button>
           </div>
-          <div className="px-4 pt-2 pb-4 overflow-y-auto h-full">
+          <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: "calc(100% - 40px)" }}>
             <h2 className="text-xl font-bold mb-4">Nearby Dog-Friendly Places</h2>
             
             {isLoading ? (
