@@ -7,8 +7,8 @@ interface LocationHeaderProps {
 }
 
 export default function LocationHeader({ 
-  title = "PawPlaces", 
-  location = "Downtown",
+  title = "PawSpots", 
+  location = "Nearby",
   onAccessibilityClick
 }: LocationHeaderProps) {
   return (

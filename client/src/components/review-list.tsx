@@ -46,7 +46,13 @@ export default function ReviewList({ locationId }: ReviewListProps) {
       return apiRequest("DELETE", `/api/reviews/${reviewId}`);
     },
     onSuccess: () => {
+      // Invalidate both the reviews list and the user's review status
       queryClient.invalidateQueries({ queryKey: [`/api/locations/${locationId}/reviews`] });
+      if (user) {
+        queryClient.invalidateQueries({ 
+          queryKey: [`/api/users/${user.id}/locations/${locationId}/review`] 
+        });
+      }
       toast({
         title: "Review deleted",
         description: "Your review has been deleted successfully!"
