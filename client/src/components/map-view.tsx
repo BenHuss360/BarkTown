@@ -96,7 +96,7 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
   }
   
   return (
-    <div className="map-container relative" style={{ height: "300px" }}>
+    <div className="map-container relative" style={{ height: "100%", flex: 1 }}>
       <MapContainer 
         center={position as [number, number]} 
         zoom={13} 

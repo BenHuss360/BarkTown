@@ -60,7 +60,7 @@ export default function Home() {
       </div>
       
       {viewMode === "map" ? (
-        <div className="relative flex-1 overflow-hidden" style={{ marginBottom: "60px" }}>
+        <div className="relative flex-1 overflow-hidden flex flex-col" style={{ marginBottom: "60px", height: "calc(100vh - 200px)" }}>
           <MapView 
             locations={filteredLocations || []} 
             isLoading={isLoading} 
