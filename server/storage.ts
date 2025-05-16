@@ -276,35 +276,48 @@ export class MemStorage implements IStorage {
       return undefined;
     }
     
-    // If approving the suggestion, add it as a new location
+    // Note: The approval handling has been moved below to avoid duplication
+    
+    // Update the suggestion status
+    const updatedSuggestion = { ...suggestion, status };
+    
+    // Store the updated suggestion
+    this.suggestions.set(id, updatedSuggestion);
+    
+    // If we're approving the suggestion, we need to also update our locations database
     if (status === "approved") {
-      // Add the suggested location to actual locations
-      this.createLocation({
+      // Create a proper location object from the suggestion
+      const newLocation: InsertLocation = {
         name: suggestion.name,
         description: suggestion.description,
         category: suggestion.category,
         address: suggestion.address,
-        latitude: suggestion.latitude || 0,
-        longitude: suggestion.longitude || 0,
+        latitude: suggestion.latitude || 37.7749,
+        longitude: suggestion.longitude || -122.4194,
+        rating: 4.0, // Start with a good rating
+        reviewCount: 1, // Start with one review
+        imageUrl: suggestion.photoUrl || `https://source.unsplash.com/random/800x600/?${suggestion.category}`,
         features: suggestion.features,
-        rating: 0,
-        reviewCount: 0,
-        imageUrl: `https://source.unsplash.com/random/800x600/?${suggestion.category}`,
-        distanceMiles: 0
-      });
+        distanceMiles: 0.5 // Default distance
+      };
       
-      // Give the user paw points (5 for approved suggestion)
+      // Add to locations database
+      this.createLocation(newLocation);
+      
+      // Award 5 points to the user who submitted the suggestion
       this.updateUserPoints(suggestion.userId, 5);
+      
+      console.log(`Added approved location: ${suggestion.name}`);
     }
     
-    // Update the suggestion status
-    const updatedSuggestion = { ...suggestion, status };
-    this.suggestions.set(id, updatedSuggestion);
     return updatedSuggestion;
   }
   
   // Initialize sample data
   private initSampleData() {
+    // Reset the suggestionIdCounter to ensure we start fresh
+    this.suggestionIdCounter = 1;
+    
     // Add a sample suggestion for user 1
     const sampleSuggestion: InsertLocationSuggestion = {
       name: "Dog Park Cafe",
