@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { User as FirebaseUser } from 'firebase/auth';
 import { signInWithGoogle, signOutUser } from '@/lib/firebase';
 
@@ -16,6 +16,7 @@ interface AuthContextType {
   isLoading: boolean;
   signIn: () => Promise<User | null>;
   signOut: () => Promise<void>;
+  makeAdmin: (enabled: boolean) => void; // New function to toggle admin status
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -23,6 +24,27 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  
+  // Function to make a user an admin or revoke admin privileges
+  const makeAdmin = (enabled: boolean) => {
+    if (user) {
+      // Create a new user object with modified ID
+      // In a real app, this would call an API to update the user's role in the database
+      const updatedUser = {
+        ...user,
+        id: enabled ? 1 : (user.id === 1 ? 2 : user.id) // Set to ID 1 for admin, or reset to another ID
+      };
+      
+      setUser(updatedUser);
+      
+      // Save to localStorage to persist admin status
+      if (enabled) {
+        localStorage.setItem('poodlemaps_admin', 'true');
+      } else {
+        localStorage.removeItem('poodlemaps_admin');
+      }
+    }
+  };
 
   const signIn = async () => {
     try {
@@ -79,11 +101,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  // Check for stored admin status on initialization
+  useEffect(() => {
+    if (user && localStorage.getItem('poodlemaps_admin') === 'true') {
+      // Apply admin status if saved in localStorage
+      makeAdmin(true);
+    }
+  }, [user]);
+
   const value = {
     user,
     isLoading,
     signIn,
     signOut,
+    makeAdmin,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
