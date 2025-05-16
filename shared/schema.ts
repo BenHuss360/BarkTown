@@ -7,6 +7,7 @@ export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   username: text("username").notNull().unique(),
   password: text("password").notNull(),
+  pawPoints: integer("paw_points").default(0),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({
@@ -61,6 +62,27 @@ export const insertReviewSchema = createInsertSchema(reviews).omit({
   createdAt: true,
 });
 
+// Location suggestions model
+export const locationSuggestions = pgTable("location_suggestions", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  category: text("category").notNull(),
+  address: text("address").notNull(),
+  latitude: doublePrecision("latitude"),
+  longitude: doublePrecision("longitude"),
+  features: text("features").notNull(),
+  userId: integer("user_id").notNull(),
+  status: text("status").default("pending").notNull(), // pending, approved, rejected
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertLocationSuggestionSchema = createInsertSchema(locationSuggestions).omit({
+  id: true,
+  status: true,
+  createdAt: true,
+});
+
 // Types
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type User = typeof users.$inferSelect;
@@ -73,3 +95,6 @@ export type Favorite = typeof favorites.$inferSelect;
 
 export type InsertReview = z.infer<typeof insertReviewSchema>;
 export type Review = typeof reviews.$inferSelect;
+
+export type InsertLocationSuggestion = z.infer<typeof insertLocationSuggestionSchema>;
+export type LocationSuggestion = typeof locationSuggestions.$inferSelect;

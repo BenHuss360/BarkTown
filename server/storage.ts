@@ -2,7 +2,8 @@ import {
   users, type User, type InsertUser, 
   locations, type Location, type InsertLocation,
   favorites, type Favorite, type InsertFavorite,
-  reviews, type Review, type InsertReview
+  reviews, type Review, type InsertReview,
+  locationSuggestions, type LocationSuggestion, type InsertLocationSuggestion
 } from "@shared/schema";
 
 export interface IStorage {
@@ -10,6 +11,7 @@ export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
   getUserByUsername(username: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  updateUserPoints(userId: number, points: number): Promise<User | undefined>;
   
   // Locations
   getLocations(): Promise<Location[]>;
@@ -32,6 +34,13 @@ export interface IStorage {
   deleteReview(id: number): Promise<boolean>;
   getReview(id: number): Promise<Review | undefined>;
   getUserReviewForLocation(userId: number, locationId: number): Promise<Review | undefined>;
+  
+  // Location Suggestions
+  getSuggestions(): Promise<LocationSuggestion[]>;
+  getSuggestionsByUser(userId: number): Promise<LocationSuggestion[]>;
+  getSuggestionById(id: number): Promise<LocationSuggestion | undefined>;
+  createSuggestion(suggestion: InsertLocationSuggestion): Promise<LocationSuggestion>;
+  updateSuggestionStatus(id: number, status: string): Promise<LocationSuggestion | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -39,23 +48,41 @@ export class MemStorage implements IStorage {
   private locations: Map<number, Location>;
   private favorites: Map<number, Favorite>;
   private reviews: Map<number, Review>;
+  private suggestions: Map<number, LocationSuggestion>;
   private userIdCounter: number;
   private locationIdCounter: number;
   private favoriteIdCounter: number;
   private reviewIdCounter: number;
+  private suggestionIdCounter: number;
 
   constructor() {
     this.users = new Map();
     this.locations = new Map();
     this.favorites = new Map();
     this.reviews = new Map();
+    this.suggestions = new Map();
     this.userIdCounter = 1;
     this.locationIdCounter = 1;
     this.favoriteIdCounter = 1;
     this.reviewIdCounter = 1;
+    this.suggestionIdCounter = 1;
     
     // Initialize with sample data
     this.initSampleData();
+  }
+  
+  // User methods with paw points support
+  async updateUserPoints(userId: number, points: number): Promise<User | undefined> {
+    const user = this.users.get(userId);
+    if (!user) {
+      return undefined;
+    }
+    
+    // Update points (initialize if not set)
+    const currentPoints = user.pawPoints || 0;
+    const updatedUser = { ...user, pawPoints: currentPoints + points };
+    this.users.set(userId, updatedUser);
+    return updatedUser;
   }
 
   // User methods
