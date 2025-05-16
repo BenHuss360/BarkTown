@@ -142,7 +142,16 @@ export default function Home() {
         </div>
       ) : (
         <div className="relative flex-1" style={{ height: "calc(100vh - 205px)" }}>
-          <div className="sticky top-0 z-40 flex justify-end bg-background px-4 py-2">
+          <div className="sticky top-0 z-40 flex justify-between items-center bg-background px-4 py-2">
+            <div className="flex items-center">
+              <h2 className="text-lg font-semibold">Nearby Places</h2>
+              {selectedCategory && selectedCategory !== "all" && (
+                <span className="ml-2 text-xs px-2 py-1 rounded-full bg-primary/10 text-primary capitalize">
+                  {selectedCategory}
+                </span>
+              )}
+            </div>
+            
             <button 
               onClick={toggleViewMode}
               aria-label="Switch to map view"
@@ -158,7 +167,6 @@ export default function Home() {
             </button>
           </div>
           <div className="location-scroll-container px-4 pt-2 pb-4 overflow-y-auto" style={{ height: "calc(100% - 40px)" }}>
-            <h2 className="text-xl font-bold mb-4">Nearby Dog-Friendly Places</h2>
             
             {isLoading ? (
               <div className="flex justify-center items-center h-24">
