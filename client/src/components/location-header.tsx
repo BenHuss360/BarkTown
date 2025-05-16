@@ -1,9 +1,10 @@
 import { MapPin, ChevronDown, Settings } from "lucide-react";
+import { Link } from "wouter";
 
 interface LocationHeaderProps {
   title?: string;
   location?: string;
-  onAccessibilityClick: () => void;
+  onAccessibilityClick?: () => void;
 }
 
 export default function LocationHeader({ 
@@ -25,15 +26,16 @@ export default function LocationHeader({
         )}
       </div>
       
-      {/* Accessibility Controls */}
+      {/* Settings Link */}
       <div className="flex">
-        <button 
-          onClick={onAccessibilityClick}
-          aria-label="Accessibility Options" 
-          className="p-2 rounded-full hover:bg-muted"
-        >
-          <Settings className="h-6 w-6 text-muted-foreground" />
-        </button>
+        <Link to="/settings">
+          <button 
+            aria-label="Settings" 
+            className="p-2 rounded-full hover:bg-muted"
+          >
+            <Settings className="h-6 w-6 text-muted-foreground" />
+          </button>
+        </Link>
       </div>
     </header>
   );
