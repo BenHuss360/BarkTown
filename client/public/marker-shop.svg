@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="40px" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0,0)" fill="none" fill-rule="evenodd">
+    <path d="M16,0 C7.16344597,0 0,7.16344597 0,16 C0,24.8365401 16,40 16,40 C16,40 32,24.8365401 32,16 C32,7.16344597 24.8365401,0 16,0 Z" fill="#3f51b5" />
+    <circle cx="16" cy="16" r="8" fill="white" />
+    <!-- Shop bag icon -->
+    <g transform="translate(11,9)" fill="#3f51b5">
+      <path d="M1,3 L3,0 L7,0 L9,3 L9,13 C9,13.5 8.5,14 8,14 L2,14 C1.5,14 1,13.5 1,13 L1,3 Z M5,1 C3.5,1 2.5,3 3,4.5 C3.5,3 4.5,2 5,1 Z"/>
+    </g>
+  </g>
+</svg>

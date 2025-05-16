@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="32px" height="40px" viewBox="0 0 32 40" xmlns="http://www.w3.org/2000/svg">
+  <g transform="translate(0,0)" fill="none" fill-rule="evenodd">
+    <path d="M16,0 C7.16344597,0 0,7.16344597 0,16 C0,24.8365401 16,40 16,40 C16,40 32,24.8365401 32,16 C32,7.16344597 24.8365401,0 16,0 Z" fill="#a34100" />
+    <circle cx="16" cy="16" r="8" fill="white" />
+    <!-- Small paw print inside the circle -->
+    <g transform="translate(12,12)" fill="#a34100" scale="0.5">
+      <circle cx="1.5" cy="1.5" r="1.5"/>
+      <circle cx="6.5" cy="1.5" r="1.5"/>
+      <circle cx="8" cy="4" r="1.2"/>
+      <circle cx="0" cy="4" r="1.2"/>
+      <ellipse cx="4" cy="6" rx="2.5" ry="2"/>
+    </g>
+  </g>
+</svg>

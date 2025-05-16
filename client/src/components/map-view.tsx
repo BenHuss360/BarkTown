@@ -9,59 +9,47 @@ import L from 'leaflet';
 // Import leaflet CSS directly
 import 'leaflet/dist/leaflet.css';
 
-// Define paw marker icon
-const pawIcon = L.icon({
-  iconUrl: '/paw-marker.svg',
-  iconSize: [32, 32],
-  iconAnchor: [16, 32],
-  popupAnchor: [0, -32]
+// Define marker icons
+const defaultIcon = L.icon({
+  iconUrl: '/marker-icon.svg',
+  iconSize: [32, 40],
+  iconAnchor: [16, 40],
+  popupAnchor: [0, -40]
 });
 
-// Function to create category-specific paw markers
+// Function to create category-specific markers
 const createMarkerIcon = (category: string) => {
-  // Use different colors for the SVG filters to colorize the paw markers
-  let filterColor = "";
-  
   switch(category) {
     case "restaurant":
-      // Orange-brown paw
-      return L.divIcon({
-        className: "custom-marker",
-        html: `<div class="paw-marker" style="filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(350deg);"><img src="/paw-marker.svg" alt="Restaurant" width="32" height="32"/></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+      return L.icon({
+        iconUrl: '/marker-restaurant.svg',
+        iconSize: [32, 40],
+        iconAnchor: [16, 40],
+        popupAnchor: [0, -40]
       });
     case "cafe":
-      // Purple-brown paw
-      return L.divIcon({
-        className: "custom-marker",
-        html: `<div class="paw-marker" style="filter: sepia(50%) saturate(300%) hue-rotate(230deg);"><img src="/paw-marker.svg" alt="Cafe" width="32" height="32"/></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+      return L.icon({
+        iconUrl: '/marker-cafe.svg',
+        iconSize: [32, 40],
+        iconAnchor: [16, 40],
+        popupAnchor: [0, -40]
       });
     case "park":
-      // Green-brown paw
-      return L.divIcon({
-        className: "custom-marker",
-        html: `<div class="paw-marker" style="filter: sepia(90%) saturate(200%) hue-rotate(50deg);"><img src="/paw-marker.svg" alt="Park" width="32" height="32"/></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+      return L.icon({
+        iconUrl: '/marker-park.svg',
+        iconSize: [32, 40],
+        iconAnchor: [16, 40],
+        popupAnchor: [0, -40]
       });
     case "shop":
-      // Blue-brown paw
-      return L.divIcon({
-        className: "custom-marker",
-        html: `<div class="paw-marker" style="filter: sepia(80%) saturate(300%) hue-rotate(170deg);"><img src="/paw-marker.svg" alt="Shop" width="32" height="32"/></div>`,
-        iconSize: [32, 32],
-        iconAnchor: [16, 32],
-        popupAnchor: [0, -32]
+      return L.icon({
+        iconUrl: '/marker-shop.svg',
+        iconSize: [32, 40],
+        iconAnchor: [16, 40],
+        popupAnchor: [0, -40]
       });
     default:
-      // Default brown paw
-      return pawIcon;
+      return defaultIcon;
   }
 };
 
@@ -182,15 +170,14 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* User location marker - with custom paw icon */}
+        {/* User location marker with clear icon */}
         <Marker 
           position={position}
-          icon={L.divIcon({
-            className: "user-location-marker",
-            html: `<div class="paw-marker" style="filter: brightness(130%) saturate(150%);"><img src="/paw-marker-selected.svg" alt="Your location" width="42" height="42"/></div>`,
-            iconSize: [42, 42],
-            iconAnchor: [21, 42],
-            popupAnchor: [0, -42]
+          icon={L.icon({
+            iconUrl: '/user-location-marker.svg',
+            iconSize: [24, 24],
+            iconAnchor: [12, 12],
+            popupAnchor: [0, -12]
           })}
         >
           <Popup>
