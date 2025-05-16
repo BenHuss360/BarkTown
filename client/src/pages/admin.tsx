@@ -39,17 +39,25 @@ export default function AdminPage() {
     mutationFn: ({ id, status }: { id: number; status: string }) => {
       return apiRequest("PUT", `/api/suggestions/${id}/status`, { status });
     },
-    onSuccess: () => {
+    onSuccess: (data, variables) => {
       // Refetch suggestions to update the list
       refetch();
       
       // Also invalidate the locations cache to refresh the main map view
       queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
       
+      // Show a different message based on status
+      let actionMessage = "updated";
+      if (variables.status === "approved") actionMessage = "approved";
+      if (variables.status === "rejected") actionMessage = "rejected";
+      
       toast({
-        title: "Status Updated",
-        description: "The suggestion status has been updated successfully.",
+        title: `Suggestion ${actionMessage}`,
+        description: `The suggestion has been ${actionMessage} successfully.`,
       });
+      
+      // Navigate to the appropriate tab based on the new status
+      setActiveTab(variables.status);
     },
     onError: (error) => {
       console.error("Error updating status:", error);

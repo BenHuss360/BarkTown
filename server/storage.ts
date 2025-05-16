@@ -690,6 +690,13 @@ export class DatabaseStorage implements IStorage {
     // First get the suggestion
     const suggestion = await this.getSuggestionById(id);
     if (!suggestion) return undefined;
+    
+    // If the status is already set to what we're trying to update it to, just return
+    // This prevents duplicate approvals/rejections
+    if (suggestion.status === status) {
+      console.log(`Suggestion ${id} already has status ${status}, skipping update`);
+      return suggestion;
+    }
 
     // Update the suggestion status
     const [updatedSuggestion] = await db
@@ -698,27 +705,53 @@ export class DatabaseStorage implements IStorage {
       .where(eq(locationSuggestions.id, id))
       .returning();
 
-    // If we're approving the suggestion, add it to the locations table
-    if (status === "approved") {
-      // Create a proper location from the suggestion
-      await this.createLocation({
-        name: suggestion.name,
-        description: suggestion.description,
-        category: suggestion.category,
-        address: suggestion.address,
-        latitude: suggestion.latitude || 37.7749,
-        longitude: suggestion.longitude || -122.4194,
-        rating: 4.0, // Start with a good rating
-        reviewCount: 1, // Start with one review
-        imageUrl: suggestion.photoUrl || "https://images.unsplash.com/photo-1610041321420-a489049a5616?q=80&w=2070",
-        features: suggestion.features,
-        distanceMiles: 0.5 // Default distance
-      });
+    // If we're approving the suggestion from a non-approved state, add it to the locations table
+    if (status === "approved" && suggestion.status !== "approved") {
+      // Check if we already have a location with this name to avoid duplicates
+      const existingLocations = await db
+        .select()
+        .from(locations)
+        .where(eq(locations.name, suggestion.name));
+        
+      if (existingLocations.length === 0) {
+        // Create a proper location from the suggestion
+        await this.createLocation({
+          name: suggestion.name,
+          description: suggestion.description,
+          category: suggestion.category,
+          address: suggestion.address,
+          latitude: suggestion.latitude || 37.7749,
+          longitude: suggestion.longitude || -122.4194,
+          rating: 4.0, // Start with a good rating
+          reviewCount: 1, // Start with one review
+          imageUrl: suggestion.photoUrl || "https://images.unsplash.com/photo-1610041321420-a489049a5616?q=80&w=2070",
+          features: suggestion.features,
+          distanceMiles: 0.5 // Default distance
+        });
 
-      // Award 5 points to the user who submitted the suggestion
-      await this.updateUserPoints(suggestion.userId, 5);
+        // Award 5 points to the user who submitted the suggestion
+        await this.updateUserPoints(suggestion.userId, 5);
+        
+        console.log(`Added approved location: ${suggestion.name}`);
+      } else {
+        console.log(`Location ${suggestion.name} already exists, skipping creation`);
+      }
+    }
+    // If we're rejecting a previously approved suggestion, we should remove it from locations
+    else if (status === "rejected" && suggestion.status === "approved") {
+      // Find locations with the same name and remove them
+      const locationsToRemove = await db
+        .select()
+        .from(locations)
+        .where(eq(locations.name, suggestion.name));
+        
+      for (const loc of locationsToRemove) {
+        await db.delete(locations).where(eq(locations.id, loc.id));
+        console.log(`Removed location ${loc.name} due to suggestion rejection`);
+      }
       
-      console.log(`Added approved location: ${suggestion.name}`);
+      // Remove the points awarded for the suggestion
+      await this.updateUserPoints(suggestion.userId, -5);
     }
 
     return updatedSuggestion;
