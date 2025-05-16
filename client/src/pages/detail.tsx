@@ -166,13 +166,14 @@ export default function Detail() {
       {/* Map */}
       <div className="px-4 py-2">
         <h3 className="font-semibold mb-2">Location</h3>
-        <div className="h-40 rounded-xl overflow-hidden">
+        <div className="h-40 rounded-xl overflow-hidden relative">
           {latitude && longitude && (
             <Map 
               center={[latitude, longitude] as [number, number]} 
               zoom={15} 
               scrollWheelZoom={false}
               style={{ height: '100%', width: '100%' }}
+              zoomControl={false}
             >
               <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

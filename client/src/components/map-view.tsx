@@ -135,17 +135,17 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
             </Popup>
           </Marker>
         ))}
+        
+        {/* Map controls */}
+        <div className="absolute bottom-4 right-4 z-[9999]">
+          <ZoomControls />
+        </div>
+        
+        {/* Current location button */}
+        <div className="absolute bottom-4 left-4 z-[9999]">
+          <LocationButton />
+        </div>
       </MapContainer>
-      
-      {/* Map controls - positioned outside of MapContainer to avoid z-index issues */}
-      <div className="absolute bottom-4 right-4 z-50">
-        <ZoomControls />
-      </div>
-      
-      {/* Current location button - positioned outside of MapContainer to avoid z-index issues */}
-      <div className="absolute bottom-4 left-4 z-50">
-        <LocationButton />
-      </div>
     </div>
   );
 }
