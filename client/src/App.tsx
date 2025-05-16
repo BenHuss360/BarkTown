@@ -13,6 +13,7 @@ import AccessibilityPanel from "@/components/accessibility-panel";
 import StatusBar from "@/components/status-bar";
 import AppNavigation from "@/components/app-navigation";
 import { AuthProvider } from "./contexts/AuthContext";
+import { LocationProvider } from "./contexts/LocationContext";
 
 function App() {
   const [showAccessibility, setShowAccessibility] = useState(false);
@@ -34,30 +35,32 @@ function App() {
   
   return (
     <AuthProvider>
-      <TooltipProvider>
-        <div className="flex flex-col h-full w-full">
-          <StatusBar />
-          
-          <main className="flex-1 flex flex-col h-full overflow-hidden">
-            <Switch>
-              <Route path="/" component={Home} />
-              <Route path="/saved" component={Saved} />
-              <Route path="/profile" component={Profile} />
-              <Route path="/location/:id" component={Detail} />
-              <Route component={NotFound} />
-            </Switch>
-          </main>
-          
-          <AppNavigation />
-          
-          <Toaster />
-          
-          <AccessibilityPanel 
-            isOpen={showAccessibility} 
-            onClose={() => setShowAccessibility(false)} 
-          />
-        </div>
-      </TooltipProvider>
+      <LocationProvider>
+        <TooltipProvider>
+          <div className="flex flex-col h-full w-full">
+            <StatusBar />
+            
+            <main className="flex-1 flex flex-col h-full overflow-hidden">
+              <Switch>
+                <Route path="/" component={Home} />
+                <Route path="/saved" component={Saved} />
+                <Route path="/profile" component={Profile} />
+                <Route path="/location/:id" component={Detail} />
+                <Route component={NotFound} />
+              </Switch>
+            </main>
+            
+            <AppNavigation />
+            
+            <Toaster />
+            
+            <AccessibilityPanel 
+              isOpen={showAccessibility} 
+              onClose={() => setShowAccessibility(false)} 
+            />
+          </div>
+        </TooltipProvider>
+      </LocationProvider>
     </AuthProvider>
   );
 }

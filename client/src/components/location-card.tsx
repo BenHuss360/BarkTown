@@ -1,9 +1,10 @@
 import { Link } from "wouter";
-import { Star, MapPin } from "lucide-react";
+import { Star, MapPin, Navigation } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Location } from "@shared/schema";
+import { useLocation } from "@/contexts/LocationContext";
 
 interface LocationCardProps {
   location: Location;
@@ -12,6 +13,7 @@ interface LocationCardProps {
 
 export default function LocationCard({ location, isSaved = false }: LocationCardProps) {
   const { toast } = useToast();
+  const { calculateDistance, userLocation, isLocating } = useLocation();
   
   // In a real app, this would use the actual user ID
   const userId = 1;
@@ -94,7 +96,12 @@ export default function LocationCard({ location, isSaved = false }: LocationCard
             
             <div className="flex items-center mt-1 text-sm text-muted-foreground">
               <MapPin className="h-4 w-4 mr-1" />
-              {distanceMiles.toFixed(1)} miles away
+              {userLocation ? 
+                `${calculateDistance(location.latitude, location.longitude).toFixed(1)} miles away` : 
+                isLocating ? 
+                  "Calculating distance..." : 
+                  `${distanceMiles.toFixed(1)} miles away (estimated)`
+              }
             </div>
             
             <div className="flex items-center mt-1">
