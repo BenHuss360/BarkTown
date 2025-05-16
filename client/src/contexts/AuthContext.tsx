@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useState } from 'react';
 import { User } from 'firebase/auth';
-import { observeAuthState, signInWithGoogle, signOutUser } from '@/lib/firebase';
+import { signInWithGoogle, signOutUser } from '@/lib/firebase';
 
 interface AuthContextType {
   user: User | null;
@@ -13,32 +13,31 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    const unsubscribe = observeAuthState((authUser) => {
-      setUser(authUser);
-      setIsLoading(false);
-    });
-
-    return () => unsubscribe();
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
 
   const signIn = async () => {
     try {
+      setIsLoading(true);
       const user = await signInWithGoogle();
+      setUser(user);
+      setIsLoading(false);
       return user;
     } catch (error) {
       console.error('Error signing in:', error);
+      setIsLoading(false);
       return null;
     }
   };
 
   const signOut = async () => {
     try {
+      setIsLoading(true);
       await signOutUser();
+      setUser(null);
+      setIsLoading(false);
     } catch (error) {
       console.error('Error signing out:', error);
+      setIsLoading(false);
     }
   };
 

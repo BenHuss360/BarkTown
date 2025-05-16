@@ -35,10 +35,17 @@ export default function Profile() {
         title: "Signed In",
         description: "Successfully signed in with Google",
       });
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error signing in:", error);
+      
+      let errorMessage = "There was a problem signing in with Google";
+      if (error?.code === "auth/unauthorized-domain") {
+        errorMessage = "You need to add the current domain to your Firebase authorized domains";
+      }
+      
       toast({
         title: "Sign In Failed",
-        description: "There was a problem signing in with Google",
+        description: errorMessage,
         variant: "destructive"
       });
     }
