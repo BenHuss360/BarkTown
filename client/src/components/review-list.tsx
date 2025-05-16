@@ -20,7 +20,7 @@ export default function ReviewList({ locationId }: ReviewListProps) {
   const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
 
   // Fetch reviews for this location
-  const { data: reviews, isLoading } = useQuery({
+  const { data: reviews = [], isLoading } = useQuery<Review[]>({
     queryKey: [`/api/locations/${locationId}/reviews`],
     retry: 1
   });
@@ -33,6 +33,11 @@ export default function ReviewList({ locationId }: ReviewListProps) {
       month: 'short',
       day: 'numeric'
     });
+  };
+
+  // TypeScript type guard to check if user exists and has an id
+  const userHasId = (user: any): user is { id: number } => {
+    return user && typeof user.id === 'number';
   };
 
   // Delete review mutation
@@ -70,18 +75,16 @@ export default function ReviewList({ locationId }: ReviewListProps) {
     return <div className="text-center py-8">Loading reviews...</div>;
   }
 
-  if (!reviews || reviews.length === 0) {
+  if (reviews.length === 0) {
     return (
-      <div className="text-center py-8 text-gray-500">
+      <div className="text-center py-4 text-gray-500 dark:text-gray-400">
         No reviews yet. Be the first to review this location!
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
-      <h3 className="text-xl font-semibold mb-4">Reviews</h3>
-      
+    <div className="space-y-4">
       {reviews.map((review: Review) => (
         <div key={review.id} className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm">
           {editingReviewId === review.id ? (
@@ -110,7 +113,7 @@ export default function ReviewList({ locationId }: ReviewListProps) {
                   </div>
                 </div>
                 
-                {user && user.id === review.userId && (
+                {userHasId(user) && user.id === review.userId && (
                   <div className="flex space-x-2">
                     <button 
                       onClick={() => handleEdit(review.id)}

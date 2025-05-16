@@ -8,6 +8,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { insertReviewSchema } from "@shared/schema";
 
+// TypeScript type guard to check if user exists and has an id
+const userHasId = (user: any): user is { id: number } => {
+  return user && typeof user.id === 'number';
+};
+
 // Form validation schema with Zod
 const reviewSchema = z.object({
   content: z.string().min(3, "Review must be at least 3 characters"),
@@ -43,7 +48,7 @@ export default function ReviewForm({ locationId, onSuccess, existingReview }: Re
       content: existingReview?.content || "",
       rating: existingReview?.rating || 5,
       photoUrl: existingReview?.photoUrl || "",
-      userId: user?.id || 1, // Default to 1 for mock implementation
+      userId: userHasId(user) ? user.id : 1, // Default to 1 for mock implementation
       locationId
     }
   });

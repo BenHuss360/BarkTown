@@ -50,7 +50,7 @@ export const signInWithGoogle = async () => {
       id: 1
     };
     
-    return mockUser as User;
+    return mockUser as unknown as User;
   } catch (error) {
     console.error("Error signing in with Google:", error);
     throw error;

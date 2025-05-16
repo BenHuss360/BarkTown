@@ -32,12 +32,18 @@ export default function Detail() {
     retry: 1
   });
   
+  // Define the type for our user review data
+  interface UserReviewData {
+    hasReview: boolean;
+    review: any | null;
+  }
+  
   // Check if user has already reviewed this location
-  const { data: userReviewData } = useQuery({
+  const { data: userReviewData = { hasReview: false, review: null } } = useQuery<UserReviewData>({
     queryKey: [`/api/users/${userId}/locations/${id}/review`],
     retry: 1,
     enabled: !!user // Only run this query if user is logged in
-  }) || { hasReview: false, review: null };
+  });
   
   const isFavorite = favoriteData?.isFavorite || false;
   
