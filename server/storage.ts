@@ -271,6 +271,21 @@ export class MemStorage implements IStorage {
     return suggestion;
   }
   
+  async updateSuggestion(id: number, suggestionData: Partial<InsertLocationSuggestion>): Promise<LocationSuggestion | undefined> {
+    const suggestion = this.suggestions.get(id);
+    if (!suggestion) {
+      return undefined;
+    }
+    
+    // Update the suggestion with the new data
+    const updatedSuggestion = { ...suggestion, ...suggestionData };
+    
+    // Store the updated suggestion
+    this.suggestions.set(id, updatedSuggestion);
+    
+    return updatedSuggestion;
+  }
+  
   async updateSuggestionStatus(id: number, status: string): Promise<LocationSuggestion | undefined> {
     const suggestion = this.suggestions.get(id);
     if (!suggestion) {

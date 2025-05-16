@@ -6,6 +6,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { apiRequest } from "@/lib/queryClient";
 import { insertLocationSuggestionSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
+import { queryClient } from "@/lib/queryClient";
 
 import {
   Dialog,
@@ -67,20 +68,18 @@ export default function EditSuggestionDialog({
       address: suggestion.address,
       category: suggestion.category,
       features: suggestion.features,
-      latitude: suggestion.latitude,
-      longitude: suggestion.longitude,
+      latitude: suggestion.latitude || undefined,
+      longitude: suggestion.longitude || undefined,
       userId: suggestion.userId,
-      photoUrl: suggestion.photoUrl || null,
+      photoUrl: suggestion.photoUrl || undefined,
     },
   });
 
   // Mutation for updating suggestion
   const { mutate, isPending } = useMutation({
-    mutationFn: (data: SuggestionFormValues) => {
-      return apiRequest(`/api/suggestions/${suggestion.id}/edit`, {
-        method: "PUT",
-        data,
-      });
+    mutationFn: async (data: SuggestionFormValues) => {
+      const response = await apiRequest("PUT", `/api/suggestions/${suggestion.id}/edit`, data);
+      return response.json();
     },
     onSuccess: () => {
       toast({
