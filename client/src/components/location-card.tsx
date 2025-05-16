@@ -50,10 +50,15 @@ export default function LocationCard({ location, isSaved = false }: LocationCard
         });
       }
       
-      // Invalidate all relevant queries to refresh data
-      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}/${id}`] });
-      
+      // Force hard refresh all queries that might be affected by this change
+      setTimeout(() => {
+        queryClient.resetQueries({ queryKey: [`/api/favorites/${userId}`] });
+        queryClient.resetQueries({ queryKey: [`/api/favorites/${userId}/${id}`] });
+        // If we're on the saved page, cause a page reload
+        if (window.location.pathname === '/saved') {
+          window.location.reload();
+        }
+      }, 100);
     } catch (error) {
       toast({
         variant: "destructive",

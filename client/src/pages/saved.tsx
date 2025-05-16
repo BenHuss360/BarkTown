@@ -12,22 +12,25 @@ export default function Saved() {
   // In a real app, this would use the actual user ID
   const userId = 1;
   
-  // Force refresh when the component mounts
+  // Force refresh when the component mounts or when the component is focused
   useEffect(() => {
+    // Immediately invalidate to refresh data
     queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
+    
+    // Set up event listener for when user returns to this page
+    const handleFocus = () => {
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    return () => window.removeEventListener('focus', handleFocus);
   }, [userId]);
   
   // Fetch user's favorite locations
-  const { data: favorites, isLoading, error, refetch } = useQuery({
+  const { data: favorites = [], isLoading, error } = useQuery({
     queryKey: [`/api/favorites/${userId}`],
-    retry: 1,
-    onError: () => {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load your saved locations"
-      });
-    }
+    staleTime: 0, // Always refetch when query is invalidated
+    retry: 2,
   });
   
   return (
