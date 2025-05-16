@@ -22,6 +22,13 @@ export const signInWithGoogle = async () => {
       prompt: 'select_account'
     });
     
+    // Support both the development domain and the deployment domain
+    const authorizedDomains = [
+      'localhost',
+      'barktown.replit.app',
+      window.location.hostname
+    ];
+    
     // Try to use real Firebase authentication first
     try {
       const result = await signInWithPopup(auth, googleProvider);
@@ -32,8 +39,7 @@ export const signInWithGoogle = async () => {
       // If we're in development or there's a domain authorization issue,
       // fall back to a mock user to allow testing
       if (authError.code === 'auth/unauthorized-domain' || 
-          window.location.hostname === 'localhost' ||
-          window.location.hostname.includes('replit.dev')) {
+          authorizedDomains.some(domain => window.location.hostname.includes(domain))) {
         console.log("Using mock user for development/testing environment");
         
         const mockUser = {
