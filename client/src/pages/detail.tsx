@@ -23,7 +23,7 @@ export default function Detail() {
   });
   
   // Check if location is in user's favorites
-  const { data: favoriteData, refetch: refetchFavorite } = useQuery({
+  const { data: favoriteData, refetch: refetchFavorite } = useQuery<{isFavorite: boolean}>({
     queryKey: [`/api/favorites/${userId}/${id}`],
     retry: 1
   });
