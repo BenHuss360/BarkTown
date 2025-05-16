@@ -338,6 +338,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(500).json({ message: "Failed to update suggestion status" });
     }
   });
+
+  // Edit suggestion details (admin only)
+  app.put("/api/suggestions/:id/edit", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid suggestion ID" });
+      }
+      
+      const suggestionData = req.body;
+      const updatedSuggestion = await storage.updateSuggestion(id, suggestionData);
+      
+      if (!updatedSuggestion) {
+        return res.status(404).json({ message: "Suggestion not found" });
+      }
+      
+      return res.json(updatedSuggestion);
+    } catch (error) {
+      console.error("Error updating suggestion details:", error);
+      return res.status(500).json({ message: "Failed to update suggestion details" });
+    }
+  });
   
   // Get user paw points
   app.get("/api/users/:userId/points", async (req: Request, res: Response) => {

@@ -41,6 +41,7 @@ export interface IStorage {
   getSuggestionById(id: number): Promise<LocationSuggestion | undefined>;
   createSuggestion(suggestion: InsertLocationSuggestion): Promise<LocationSuggestion>;
   updateSuggestionStatus(id: number, status: string): Promise<LocationSuggestion | undefined>;
+  updateSuggestion(id: number, suggestion: Partial<InsertLocationSuggestion>): Promise<LocationSuggestion | undefined>;
 }
 
 export class MemStorage implements IStorage {
@@ -686,6 +687,21 @@ export class DatabaseStorage implements IStorage {
     return suggestion;
   }
 
+  async updateSuggestion(id: number, suggestionData: Partial<InsertLocationSuggestion>): Promise<LocationSuggestion | undefined> {
+    // First check if the suggestion exists
+    const suggestion = await this.getSuggestionById(id);
+    if (!suggestion) return undefined;
+    
+    // Update the suggestion with the new data
+    const [updatedSuggestion] = await db
+      .update(locationSuggestions)
+      .set(suggestionData)
+      .where(eq(locationSuggestions.id, id))
+      .returning();
+      
+    return updatedSuggestion;
+  }
+  
   async updateSuggestionStatus(id: number, status: string): Promise<LocationSuggestion | undefined> {
     // First get the suggestion
     const suggestion = await this.getSuggestionById(id);
