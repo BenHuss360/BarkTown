@@ -39,6 +39,9 @@
   --ring: 210 100% 50%;
   --radius: 0.75rem;
   
+  /* Accessibility variables */
+  --text-size-factor: 1;
+  
   /* Charts */
   --chart-1: 210 100% 50%;
   --chart-2: 45 100% 50%;
@@ -110,6 +113,38 @@
   --sidebar-ring: 210 100% 50%;
 }
 
+/* High contrast mode styles */
+.high-contrast {
+  --background: 0 0% 100%;
+  --foreground: 0 0% 0%;
+  --muted: 0 0% 90%;
+  --muted-foreground: 0 0% 0%;
+  --border: 0 0% 0%;
+  --input: 0 0% 85%;
+  --card: 0 0% 95%;
+  --card-foreground: 0 0% 0%;
+}
+
+/* Dark mode high contrast */
+.dark.high-contrast {
+  --background: 0 0% 0%;
+  --foreground: 0 0% 100%;
+  --muted: 0 0% 20%;
+  --muted-foreground: 0 0% 100%;
+  --border: 0 0% 100%;
+  --input: 0 0% 25%;
+  --card: 0 0% 10%;
+  --card-foreground: 0 0% 100%;
+}
+
+/* Colorblind mode */
+.colorblind-mode {
+  --primary: 220 90% 45%;
+  --secondary: 35 100% 55%;
+  --destructive: 0 100% 45%;
+  --success: 160 100% 40%;
+}
+
 @layer base {
   * {
     @apply border-border;
@@ -125,6 +160,11 @@
     -webkit-touch-callout: none;
     overflow: hidden;
     overscroll-behavior: none;
+  }
+  
+  /* Apply text size scaling to common text elements */
+  p, h1, h2, h3, h4, h5, h6, span, button, a, label, input, textarea, select {
+    font-size: calc(1em * var(--text-size-factor));
   }
   
   /* Default focus styles */
@@ -175,6 +215,12 @@
   
   .leaflet-tile-pane {
     z-index: 1 !important;
+  }
+  
+  /* Reduce motion */
+  .reduce-motion * {
+    transition-duration: 0.05s !important;
+    animation-duration: 0.05s !important;
   }
   
   /* Improves accessibility for people with visual/motor impairments */
