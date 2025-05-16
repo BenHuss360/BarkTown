@@ -280,9 +280,61 @@ export default function SuggestLocationForm() {
           )}
         </div>
         
+        {/* Photo Upload */}
+        <div className="space-y-2 mt-4">
+          <FormLabel className="block">Photo (Optional)</FormLabel>
+          
+          <div className="flex items-center space-x-3">
+            <input
+              type="file"
+              id="photo"
+              accept="image/*"
+              onChange={handlePhotoChange}
+              className="hidden"
+            />
+            <Button 
+              type="button" 
+              variant="outline" 
+              onClick={() => document.getElementById("photo")?.click()}
+              className="flex-1"
+            >
+              Upload Photo
+            </Button>
+            
+            {photoFile && (
+              <Button 
+                type="button" 
+                variant="outline" 
+                className="text-red-500"
+                onClick={() => {
+                  setPhotoFile(null);
+                  setPhotoPreview(null);
+                  form.setValue("photoUrl", "");
+                }}
+              >
+                Remove
+              </Button>
+            )}
+          </div>
+          
+          {photoPreview && (
+            <div className="mt-2">
+              <img 
+                src={photoPreview} 
+                alt="Preview" 
+                className="w-full h-32 object-cover rounded-md"
+              />
+            </div>
+          )}
+          
+          <p className="text-xs text-muted-foreground mt-1">
+            Adding a photo can help others recognize this location.
+          </p>
+        </div>
+        
         <Button 
           type="submit" 
-          className="w-full"
+          className="w-full mt-4"
           disabled={submitMutation.isPending}
         >
           {submitMutation.isPending ? "Submitting..." : "Submit Suggestion"}
