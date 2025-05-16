@@ -147,6 +147,52 @@ export class MemStorage implements IStorage {
     );
   }
   
+  // Review methods
+  async getReviewsByLocationId(locationId: number): Promise<Review[]> {
+    return Array.from(this.reviews.values()).filter(
+      (review) => review.locationId === locationId
+    );
+  }
+
+  async getUserReviews(userId: number): Promise<Review[]> {
+    return Array.from(this.reviews.values()).filter(
+      (review) => review.userId === userId
+    );
+  }
+
+  async addReview(insertReview: InsertReview): Promise<Review> {
+    const id = this.reviewIdCounter++;
+    const createdAt = new Date();
+    const review: Review = { ...insertReview, id, createdAt };
+    this.reviews.set(id, review);
+    return review;
+  }
+
+  async updateReview(id: number, reviewUpdate: Partial<InsertReview>): Promise<Review | undefined> {
+    const existingReview = this.reviews.get(id);
+    if (!existingReview) {
+      return undefined;
+    }
+    
+    const updatedReview = { ...existingReview, ...reviewUpdate };
+    this.reviews.set(id, updatedReview);
+    return updatedReview;
+  }
+
+  async deleteReview(id: number): Promise<boolean> {
+    return this.reviews.delete(id);
+  }
+
+  async getReview(id: number): Promise<Review | undefined> {
+    return this.reviews.get(id);
+  }
+
+  async getUserReviewForLocation(userId: number, locationId: number): Promise<Review | undefined> {
+    return Array.from(this.reviews.values()).find(
+      (review) => review.userId === userId && review.locationId === locationId
+    );
+  }
+  
   // Initialize sample data
   private initSampleData() {
     // Sample locations

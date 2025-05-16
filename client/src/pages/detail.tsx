@@ -7,6 +7,9 @@ import { MapContainer as Map, Marker, TileLayer } from "react-leaflet";
 import { Star, MapPin, ArrowLeft } from "lucide-react";
 import { Location } from "@shared/schema";
 import L from 'leaflet';
+import { useAuth } from "@/contexts/AuthContext";
+import ReviewForm from "@/components/review-form";
+import ReviewList from "@/components/review-list";
 
 export default function Detail() {
   const { id } = useParams<{ id: string }>();
