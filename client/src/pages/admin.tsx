@@ -25,8 +25,14 @@ export default function AdminPage() {
   const isAdmin = user && user.id === ADMIN_ID;
   
   // Fetch all suggestions
-  const { data: suggestions = [], isLoading, refetch } = useQuery<any[]>({
+  const { data: suggestions = [], isLoading: suggestionsLoading, refetch: refetchSuggestions } = useQuery<any[]>({
     queryKey: ["/api/suggestions"],
+    enabled: !!isAdmin,
+  });
+  
+  // Fetch all locations from database
+  const { data: allLocations = [], isLoading: locationsLoading } = useQuery<any[]>({
+    queryKey: ["/api/locations"],
     enabled: !!isAdmin,
   });
   
