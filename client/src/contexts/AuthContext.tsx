@@ -31,10 +31,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       
       // Create app user with our simplified structure
       if (firebaseUser) {
-        // For demo purposes, assign ID 1 to the signed-in user
-        // In a real app, this would be retrieved from the database
+        // Generate a user ID based on the user's email or UID to ensure different users get different IDs
+        // This is for demonstration purposes only - in a real app, this would come from the database
+        let userId = 1; // Default admin user for testing
+        
+        // If this is a mock user and we're trying with a different email, assign a different ID
+        if (firebaseUser.email === "dog.lover@example.com") {
+          userId = 1; // Admin user
+        } else if (firebaseUser.email?.includes("test")) {
+          userId = 2; // Test user
+        } else if (firebaseUser.uid && firebaseUser.uid !== "user123") {
+          // Generate a predictable but different ID based on the UID
+          userId = Math.abs(firebaseUser.uid.split("").reduce((a, b) => a + b.charCodeAt(0), 0) % 100) + 2;
+        }
+        
         const appUser: User = {
-          id: 1,
+          id: userId,
           uid: firebaseUser.uid,
           displayName: firebaseUser.displayName,
           email: firebaseUser.email,
