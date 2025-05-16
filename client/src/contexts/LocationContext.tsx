@@ -12,8 +12,12 @@ interface LocationContextType {
 
 const LocationContext = createContext<LocationContextType | null>(null);
 
+// London coordinates (center of London)
+const LONDON_COORDINATES: [number, number] = [51.5074, -0.1278];
+
 export function LocationProvider({ children }: { children: ReactNode }) {
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  // Default to London coordinates as fallback
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(LONDON_COORDINATES);
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState<string | null>(null);
 

@@ -17,40 +17,54 @@ const googleProvider = new GoogleAuthProvider();
 // Sign in with Google
 export const signInWithGoogle = async () => {
   try {
-    // For development/testing, we'll simulate a successful login
-    // since Firebase requires domain authorization
+    // Use real Firebase authentication with popup
+    googleProvider.setCustomParameters({
+      prompt: 'select_account'
+    });
     
-    // In a production app, this would be real Firebase authentication
-    // const result = await signInWithPopup(auth, googleProvider);
-    // return result.user;
-    
-    // Instead, let's create a mock user for testing purposes
-    const mockUser = {
-      uid: "user123",
-      displayName: "Dog Lover",
-      email: "dog.lover@example.com",
-      photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=doggo",
-      emailVerified: true,
-      providerData: [
-        {
-          providerId: "google.com",
+    // Try to use real Firebase authentication first
+    try {
+      const result = await signInWithPopup(auth, googleProvider);
+      return result.user;
+    } catch (authError: any) {
+      console.error("Firebase auth error:", authError);
+      
+      // If we're in development or there's a domain authorization issue,
+      // fall back to a mock user to allow testing
+      if (authError.code === 'auth/unauthorized-domain' || 
+          window.location.hostname === 'localhost' ||
+          window.location.hostname.includes('replit.dev')) {
+        console.log("Using mock user for development/testing environment");
+        
+        const mockUser = {
           uid: "user123",
           displayName: "Dog Lover",
           email: "dog.lover@example.com",
-          phoneNumber: null,
-          photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=doggo"
-        }
-      ],
-      // Add any other User properties that might be needed
-      getIdToken: () => Promise.resolve("mock-token"),
-      reload: () => Promise.resolve(),
-      delete: () => Promise.resolve(),
-      toJSON: () => ({}),
-      // Add custom property for our app
-      id: 1
-    };
-    
-    return mockUser as unknown as User;
+          photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=doggo",
+          emailVerified: true,
+          providerData: [
+            {
+              providerId: "google.com",
+              uid: "user123",
+              displayName: "Dog Lover",
+              email: "dog.lover@example.com",
+              phoneNumber: null,
+              photoURL: "https://api.dicebear.com/7.x/avataaars/svg?seed=doggo"
+            }
+          ],
+          getIdToken: () => Promise.resolve("mock-token"),
+          reload: () => Promise.resolve(),
+          delete: () => Promise.resolve(),
+          toJSON: () => ({}),
+          id: 1
+        };
+        
+        return mockUser as unknown as User;
+      } else {
+        // If it's a different error, rethrow it
+        throw authError;
+      }
+    }
   } catch (error) {
     console.error("Error signing in with Google:", error);
     throw error;
@@ -60,10 +74,8 @@ export const signInWithGoogle = async () => {
 // Sign out
 export const signOutUser = async () => {
   try {
-    // For production
-    // await signOut(auth);
-    
-    // For development/testing with our mock user
+    // Always try to sign out properly with Firebase
+    await signOut(auth);
     return Promise.resolve();
   } catch (error) {
     console.error("Error signing out:", error);

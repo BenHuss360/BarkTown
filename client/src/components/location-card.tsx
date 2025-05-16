@@ -70,13 +70,13 @@ export default function LocationCard({ location, isSaved = false }: LocationCard
     }
   };
   
-  // Get directions
+  // Get directions using Google Maps
   const getDirections = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
-    // In a real app, this would use the actual coordinates
-    window.open(`https://maps.apple.com/?q=${location.latitude},${location.longitude}`, '_blank');
+    // Use Google Maps for directions
+    window.open(`https://www.google.com/maps/dir/?api=1&destination=${location.latitude},${location.longitude}`, '_blank');
   };
   
   return (

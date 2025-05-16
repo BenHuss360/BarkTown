@@ -50,7 +50,26 @@ function LocationButton() {
   const map = useMap();
   
   const handleClick = () => {
-    map.locate({ setView: true, maxZoom: 15 });
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          // Set view to user's current location with animation
+          map.flyTo(
+            [position.coords.latitude, position.coords.longitude],
+            15,
+            { animate: true, duration: 1 }
+          );
+        },
+        (error) => {
+          console.error("Error getting current location:", error);
+          // Fallback to London if location access fails
+          map.flyTo([51.5074, -0.1278], 13, { animate: true });
+          alert("Could not get your location. Please check your location permissions.");
+        }
+      );
+    } else {
+      alert("Geolocation is not supported by your browser");
+    }
   };
   
   return (
@@ -97,18 +116,22 @@ function ZoomControls() {
 }
 
 export default function MapView({ locations, isLoading = false }: MapViewProps) {
-  const [position, setPosition] = useState<[number, number]>([37.7749, -122.4194]);
+  // Default to London coordinates
+  const [position, setPosition] = useState<[number, number]>([51.5074, -0.1278]);
   
   // Get user's location on component mount
   useEffect(() => {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        setPosition([position.coords.latitude, position.coords.longitude]);
-      },
-      (error) => {
-        console.error("Error getting location:", error);
-      }
-    );
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setPosition([position.coords.latitude, position.coords.longitude]);
+        },
+        (error) => {
+          console.error("Error getting location:", error);
+          // Keep London as default if there's an error
+        }
+      );
+    }
   }, []);
   
   if (isLoading) {
