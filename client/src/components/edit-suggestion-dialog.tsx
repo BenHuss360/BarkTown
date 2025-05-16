@@ -264,7 +264,7 @@ export default function EditSuggestionDialog({
                         onChange={(e) => {
                           const value = e.target.value === "" ? undefined : parseFloat(e.target.value);
                           field.onChange(value);
-                          if (value !== null && mapPosition?.[1]) {
+                          if (value !== null && mapPosition && typeof value === 'number') {
                             setMapPosition([value, mapPosition[1]]);
                           }
                         }}
@@ -290,7 +290,7 @@ export default function EditSuggestionDialog({
                         onChange={(e) => {
                           const value = e.target.value === "" ? undefined : parseFloat(e.target.value);
                           field.onChange(value);
-                          if (value !== null && mapPosition?.[0]) {
+                          if (value !== null && mapPosition && typeof value === 'number') {
                             setMapPosition([mapPosition[0], value]);
                           }
                         }}
