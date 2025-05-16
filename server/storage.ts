@@ -330,6 +330,34 @@ export class MemStorage implements IStorage {
       userId: 1,
       locationId: 3
     });
+    
+    // Sample reviews to showcase the review functionality
+    const sampleReviews: InsertReview[] = [
+      {
+        userId: 1,
+        locationId: 1,
+        rating: 5,
+        content: "Absolutely loved this place! My dog was welcomed with treats and water. The outdoor seating area was perfect for us to relax. Will definitely be back!",
+        photoUrl: "https://images.unsplash.com/photo-1541599540903-216a46ca1dc0?ixlib=rb-4.0.3&q=85"
+      },
+      {
+        userId: 1,
+        locationId: 3,
+        rating: 4,
+        content: "Great park with lots of space for dogs to run around. The off-leash area was clean and well maintained. My pup had a blast playing with other dogs here!",
+        photoUrl: null
+      },
+      {
+        userId: 1,
+        locationId: 7,
+        rating: 3,
+        content: "Decent place for dogs, but could use more shade in the outdoor dining area. The staff was friendly though and provided water bowls.",
+        photoUrl: null
+      }
+    ];
+    
+    // Create sample reviews
+    sampleReviews.forEach(review => this.addReview(review));
   }
 }
 
