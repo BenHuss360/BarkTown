@@ -68,10 +68,7 @@ export default function ReviewForm({ locationId, onSuccess, existingReview }: Re
 
   const createReviewMutation = useMutation({
     mutationFn: (data: ReviewFormValues) => {
-      return apiRequest("/api/reviews", {
-        method: "POST",
-        body: JSON.stringify(data)
-      });
+      return apiRequest("POST", "/api/reviews", data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/locations/${locationId}/reviews`] });
@@ -93,10 +90,7 @@ export default function ReviewForm({ locationId, onSuccess, existingReview }: Re
 
   const updateReviewMutation = useMutation({
     mutationFn: (data: ReviewFormValues) => {
-      return apiRequest(`/api/reviews/${existingReview?.id}`, {
-        method: "PUT",
-        body: JSON.stringify(data)
-      });
+      return apiRequest("PUT", `/api/reviews/${existingReview?.id}`, data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/locations/${locationId}/reviews`] });

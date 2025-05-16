@@ -15,6 +15,7 @@ export default function Detail() {
   const { id } = useParams<{ id: string }>();
   const [_, navigate] = useLocation();
   const { toast } = useToast();
+  const { user } = useAuth();
   
   // In a real app, this would use the actual user ID
   const userId = 1;
@@ -29,6 +30,13 @@ export default function Detail() {
   const { data: favoriteData, refetch: refetchFavorite } = useQuery<{isFavorite: boolean}>({
     queryKey: [`/api/favorites/${userId}/${id}`],
     retry: 1
+  });
+  
+  // Check if user has already reviewed this location
+  const { data: userReviewData } = useQuery({
+    queryKey: [`/api/users/${userId}/locations/${id}/review`],
+    retry: 1,
+    enabled: !!user // Only run this query if user is logged in
   });
   
   const isFavorite = favoriteData?.isFavorite || false;

@@ -38,9 +38,7 @@ export default function ReviewList({ locationId }: ReviewListProps) {
   // Delete review mutation
   const deleteReviewMutation = useMutation({
     mutationFn: (reviewId: number) => {
-      return apiRequest(`/api/reviews/${reviewId}`, {
-        method: "DELETE"
-      });
+      return apiRequest("DELETE", `/api/reviews/${reviewId}`);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [`/api/locations/${locationId}/reviews`] });

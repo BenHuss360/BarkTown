@@ -163,7 +163,9 @@ export class MemStorage implements IStorage {
   async addReview(insertReview: InsertReview): Promise<Review> {
     const id = this.reviewIdCounter++;
     const createdAt = new Date();
-    const review: Review = { ...insertReview, id, createdAt };
+    // Ensure photoUrl is either a string or null, not undefined
+    const photoUrl = insertReview.photoUrl || null;
+    const review: Review = { ...insertReview, photoUrl, id, createdAt };
     this.reviews.set(id, review);
     return review;
   }
@@ -174,7 +176,9 @@ export class MemStorage implements IStorage {
       return undefined;
     }
     
-    const updatedReview = { ...existingReview, ...reviewUpdate };
+    // Ensure photoUrl is either a string or null, not undefined
+    const photoUrl = reviewUpdate.photoUrl !== undefined ? reviewUpdate.photoUrl || null : existingReview.photoUrl;
+    const updatedReview = { ...existingReview, ...reviewUpdate, photoUrl };
     this.reviews.set(id, updatedReview);
     return updatedReview;
   }
