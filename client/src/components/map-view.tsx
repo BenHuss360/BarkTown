@@ -6,6 +6,9 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Plus, Minus, Locate } from "lucide-react";
 import L from 'leaflet';
 
+// Import leaflet CSS directly
+import 'leaflet/dist/leaflet.css';
+
 // Define custom marker icon
 const markerIcon = L.divIcon({
   className: "custom-marker",

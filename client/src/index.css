@@ -154,12 +154,27 @@
   
   /* Map container */
   .map-container {
-    @apply h-80;
+    @apply h-80 w-full;
   }
   
   /* Leaflet custom styles */
   .leaflet-container {
     @apply h-full w-full z-10;
+  }
+  
+  /* Fix map tiles display */
+  .leaflet-tile-container img {
+    width: 256px !important;
+    height: 256px !important;
+  }
+  
+  /* Ensure panes are visible */
+  .leaflet-map-pane {
+    z-index: 2 !important;
+  }
+  
+  .leaflet-tile-pane {
+    z-index: 1 !important;
   }
   
   /* Improves accessibility for people with visual/motor impairments */

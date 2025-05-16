@@ -13,7 +13,7 @@ export default function Home() {
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
   
   // Fetch all locations
-  const { data: locations, isLoading } = useQuery({
+  const { data: locations, isLoading } = useQuery<Location[]>({
     queryKey: ["/api/locations"],
     retry: 1
   });
