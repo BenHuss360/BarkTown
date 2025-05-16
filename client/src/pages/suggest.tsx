@@ -11,19 +11,12 @@ export default function SuggestLocation() {
   const [_, navigate] = useLocation();
   const [showInstructions, setShowInstructions] = useState(true);
   
-  // Fetch user's points if logged in
-  const { data: pointsData = { pawPoints: 0 } } = useQuery<{ pawPoints: number }>({
-    queryKey: [`/api/users/${user?.id || 1}/points`],
-    enabled: !!user,
-  });
-  
   // Fetch user's current suggestions if logged in
   const { data: suggestionsData = [] } = useQuery<any[]>({
     queryKey: [`/api/users/${user?.id || 1}/suggestions`],
     enabled: !!user,
   });
 
-  const pawPoints = pointsData.pawPoints;
   const userSuggestions = suggestionsData;
   
   if (!user) {
@@ -50,16 +43,8 @@ export default function SuggestLocation() {
       <LocationHeader title="Suggest Location" onAccessibilityClick={() => {}} />
       
       <div className="flex-1 px-4 py-4 overflow-y-auto">
-        {/* User's paw points */}
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold">Suggest a Location</h2>
-          <div className="bg-orange-50 dark:bg-orange-900/20 text-orange-700 dark:text-orange-300 px-3 py-1 rounded-full flex items-center text-sm">
-            <span className="mr-1">🐾</span>
-            <span>{pawPoints} Paw Points</span>
-          </div>
-        </div>
+        <h2 className="text-xl font-bold mb-4">Suggest a Location</h2>
         
-        {/* Instructions */}
         {showInstructions && (
           <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
             <h3 className="font-medium text-blue-700 dark:text-blue-300 mb-2">How Suggestions Work</h3>
@@ -80,7 +65,6 @@ export default function SuggestLocation() {
           </div>
         )}
         
-        {/* Show user's previous suggestions if any */}
         {userSuggestions.length > 0 && (
           <div className="mb-4">
             <h3 className="font-medium mb-2">Your Suggestions</h3>
@@ -111,7 +95,6 @@ export default function SuggestLocation() {
           </div>
         )}
         
-        {/* Suggestion form */}
         <SuggestLocationForm />
       </div>
     </div>

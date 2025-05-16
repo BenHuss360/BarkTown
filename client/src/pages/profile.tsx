@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
@@ -6,7 +6,7 @@ import { Slider } from "@/components/ui/slider";
 import LocationHeader from "@/components/location-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { FiLogIn, FiLogOut, FiUser } from "react-icons/fi";
-import { getCurrentUser } from "@/lib/firebase";
+import { useQuery } from "@tanstack/react-query";
 
 // Settings that would be stored in local storage in a real app
 interface AccessibilitySettings {
@@ -20,6 +20,23 @@ interface AccessibilitySettings {
 export default function Profile() {
   const { toast } = useToast();
   const { user, signIn, signOut, isLoading } = useAuth();
+  
+  // Fetch user's paw points if logged in
+  const { data: pointsData = { pawPoints: 0 } } = useQuery<{ pawPoints: number }>({
+    queryKey: [`/api/users/${user?.id || 1}/points`],
+    enabled: !!user,
+  });
+  
+  // Fetch user's current suggestions if logged in
+  const { data: suggestionsData = [] } = useQuery<any[]>({
+    queryKey: [`/api/users/${user?.id || 1}/suggestions`],
+    enabled: !!user,
+  });
+  
+  const pawPoints = pointsData.pawPoints;
+  const pendingSuggestions = suggestionsData.filter((s: any) => s.status === "pending").length;
+  const approvedSuggestions = suggestionsData.filter((s: any) => s.status === "approved").length;
+  
   const [settings, setSettings] = useState<AccessibilitySettings>({
     textSize: 2,
     highContrast: false,
@@ -83,31 +100,61 @@ export default function Profile() {
         <h2 className="text-xl font-bold mb-4">Your Profile</h2>
         
         {user ? (
-          <div className="bg-card rounded-xl p-4 mb-4">
-            <div className="flex items-center space-x-4">
-              {user.photoURL ? (
-                <img 
-                  src={user.photoURL} 
-                  alt={user.displayName || "User"} 
-                  className="rounded-full w-16 h-16 object-cover"
-                />
-              ) : (
-                <div className="bg-primary rounded-full w-16 h-16 flex items-center justify-center text-white text-2xl font-bold">
-                  {user.displayName ? user.displayName.charAt(0).toUpperCase() : <FiUser />}
+          <>
+            <div className="bg-card rounded-xl p-4 mb-4">
+              <div className="flex items-center space-x-4">
+                {user.photoURL ? (
+                  <img 
+                    src={user.photoURL} 
+                    alt={user.displayName || "User"} 
+                    className="rounded-full w-16 h-16 object-cover"
+                  />
+                ) : (
+                  <div className="bg-primary rounded-full w-16 h-16 flex items-center justify-center text-white text-2xl font-bold">
+                    {user.displayName ? user.displayName.charAt(0).toUpperCase() : <FiUser />}
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className="font-semibold text-lg">{user.displayName || "Dog Lover"}</h3>
+                  <p className="text-muted-foreground">{user.email}</p>
+                  <button 
+                    onClick={handleSignOut}
+                    className="flex items-center gap-2 mt-2 text-sm text-primary"
+                  >
+                    <FiLogOut size={16} /> Sign out
+                  </button>
                 </div>
-              )}
-              <div>
-                <h3 className="font-semibold text-lg">{user.displayName || "Dog Lover"}</h3>
-                <p className="text-muted-foreground">{user.email}</p>
-                <button 
-                  onClick={handleSignOut}
-                  className="flex items-center gap-2 mt-2 text-sm text-primary"
-                >
-                  <FiLogOut size={16} /> Sign out
-                </button>
               </div>
             </div>
-          </div>
+            
+            <div className="bg-card rounded-xl p-4 mb-4">
+              <h3 className="font-semibold text-lg mb-3">Paw Points</h3>
+              
+              <div className="flex items-center justify-between mb-3">
+                <div className="flex items-center">
+                  <span className="text-3xl mr-2 text-orange-500">🐾</span>
+                  <div>
+                    <div className="text-2xl font-bold">{pawPoints}</div>
+                    <div className="text-xs text-muted-foreground">Total points</div>
+                  </div>
+                </div>
+                
+                <div className="text-right">
+                  <div className="text-sm font-medium">{approvedSuggestions}</div>
+                  <div className="text-xs text-muted-foreground">Approved locations</div>
+                </div>
+              </div>
+              
+              {pendingSuggestions > 0 && (
+                <div className="bg-blue-50 dark:bg-blue-900/20 p-3 rounded-lg text-sm">
+                  <span className="font-medium">You have {pendingSuggestions} pending suggestion{pendingSuggestions !== 1 ? 's' : ''}!</span>
+                  <p className="text-xs mt-1 text-gray-600 dark:text-gray-400">
+                    Each approved suggestion earns you 5 paw points.
+                  </p>
+                </div>
+              )}
+            </div>
+          </>
         ) : (
           <div className="bg-card rounded-xl p-4 mb-4">
             <div className="flex flex-col items-center text-center">
@@ -135,7 +182,6 @@ export default function Profile() {
         
         <h3 className="font-semibold text-lg mt-6 mb-4">Accessibility Settings</h3>
         
-        {/* Text Size */}
         <div className="bg-card rounded-xl p-4 mb-4">
           <div className="mb-4">
             <Label htmlFor="textSize" className="block font-medium mb-2">Text Size</Label>
@@ -155,7 +201,6 @@ export default function Profile() {
           </div>
         </div>
         
-        {/* Contrast */}
         <div className="bg-card rounded-xl p-4 mb-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="highContrast" className="font-medium">High Contrast</Label>
@@ -167,7 +212,6 @@ export default function Profile() {
           </div>
         </div>
         
-        {/* Color Blind Mode */}
         <div className="bg-card rounded-xl p-4 mb-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="colorBlindMode" className="font-medium">Color Blind Mode</Label>
@@ -179,7 +223,6 @@ export default function Profile() {
           </div>
         </div>
         
-        {/* Reduce Motion */}
         <div className="bg-card rounded-xl p-4 mb-4">
           <div className="flex items-center justify-between">
             <Label htmlFor="reduceMotion" className="font-medium">Reduce Motion</Label>
@@ -191,7 +234,6 @@ export default function Profile() {
           </div>
         </div>
         
-        {/* Dark Mode */}
         <div className="bg-card rounded-xl p-4 mb-4">
           <Label className="block font-medium mb-2">Dark Mode</Label>
           <div className="grid grid-cols-3 gap-2">
@@ -216,7 +258,6 @@ export default function Profile() {
           </div>
         </div>
         
-        {/* Save Button */}
         <button 
           onClick={handleSaveSettings}
           className="w-full ios-button bg-primary text-white mt-4"

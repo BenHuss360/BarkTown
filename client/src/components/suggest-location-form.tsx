@@ -103,12 +103,19 @@ export default function SuggestLocationForm() {
   
   // Toggle current location usage
   const toggleUseCurrentLocation = () => {
-    setUseCurrentLocation(!useCurrentLocation);
+    const newState = !useCurrentLocation;
+    setUseCurrentLocation(newState);
     
-    if (!useCurrentLocation && userLocation) {
-      // Set the form values for lat/lng if using current location
+    if (newState && userLocation) {
+      // When enabling current location:
+      // 1. Set the form values for lat/lng
       form.setValue("latitude", userLocation[0]);
       form.setValue("longitude", userLocation[1]);
+      
+      // 2. Get address from coordinates via reverse geocoding
+      // This is a simplified example - in a real app, you'd use a geocoding service
+      const address = "Determined from your current location";
+      form.setValue("address", address);
     } else {
       // Clear the form values if not using current location
       form.setValue("latitude", null);
@@ -182,9 +189,21 @@ export default function SuggestLocationForm() {
           name="address"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Address</FormLabel>
+              <FormLabel>
+                Address
+                {useCurrentLocation && (
+                  <span className="ml-2 text-xs text-green-600 dark:text-green-400">
+                    (Using your location)
+                  </span>
+                )}
+              </FormLabel>
               <FormControl>
-                <Input placeholder="123 Main St, City, State" {...field} />
+                <Input 
+                  placeholder="123 Main St, City, State" 
+                  {...field}
+                  disabled={useCurrentLocation} 
+                  className={useCurrentLocation ? "bg-gray-100 dark:bg-gray-800" : ""}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
