@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,11 +21,18 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { MapPin, Crosshair } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { useLocation } from "@/contexts/LocationContext";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { insertLocationSuggestionSchema } from "@shared/schema";
+import { 
+  MapContainer, 
+  TileLayer, 
+  Marker, 
+  useMapEvents 
+} from "react-leaflet";
 
 // Extend the schema with additional validation
 const locationSchema = insertLocationSuggestionSchema.extend({
@@ -39,6 +46,27 @@ const locationSchema = insertLocationSuggestionSchema.extend({
 // Type for form values
 type LocationFormValues = z.infer<typeof locationSchema>;
 
+// Map marker component
+function LocationMarker({ position, setPosition }: { 
+  position: [number, number] | null;
+  setPosition: (pos: [number, number]) => void;
+}) {
+  const map = useMapEvents({
+    click(e) {
+      setPosition([e.latlng.lat, e.latlng.lng]);
+    },
+  });
+
+  // Center map on selected position
+  useEffect(() => {
+    if (position) {
+      map.flyTo(position, map.getZoom());
+    }
+  }, [position, map]);
+
+  return position ? <Marker position={position} /> : null;
+}
+
 export default function SuggestLocationForm() {
   const { toast } = useToast();
   const { user } = useAuth();
@@ -46,6 +74,11 @@ export default function SuggestLocationForm() {
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
+  
+  // Map default center (London)
+  const defaultCenter: [number, number] = [51.505, -0.09];
   
   // Create form
   const form = useForm<LocationFormValues>({
@@ -62,6 +95,21 @@ export default function SuggestLocationForm() {
       photoUrl: "",
     },
   });
+  
+  // Set map position when user location changes
+  useEffect(() => {
+    if (userLocation) {
+      setMapPosition(userLocation);
+    }
+  }, [userLocation]);
+  
+  // Update form when map position changes
+  useEffect(() => {
+    if (mapPosition) {
+      form.setValue("latitude", mapPosition[0]);
+      form.setValue("longitude", mapPosition[1]);
+    }
+  }, [mapPosition, form]);
   
   // Handle photo upload
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -260,16 +308,80 @@ export default function SuggestLocationForm() {
           )}
         />
         
-        {/* Location toggle */}
-        <div className="flex items-center space-x-2 pb-2">
+        {/* Coordinates display */}
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="latitude"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Latitude</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    value={field.value?.toString() || ''} 
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                      field.onChange(value);
+                      if (value !== null && mapPosition?.[1]) {
+                        setMapPosition([value, mapPosition[1]]);
+                      }
+                    }}
+                    readOnly={showMap}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="longitude"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Longitude</FormLabel>
+                <FormControl>
+                  <Input 
+                    {...field} 
+                    value={field.value?.toString() || ''} 
+                    onChange={(e) => {
+                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
+                      field.onChange(value);
+                      if (value !== null && mapPosition?.[0]) {
+                        setMapPosition([mapPosition[0], value]);
+                      }
+                    }}
+                    readOnly={showMap}
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        {/* Map toggle and current location */}
+        <div className="flex flex-wrap items-center gap-2">
+          <Button 
+            type="button" 
+            variant={showMap ? "default" : "outline"} 
+            size="sm"
+            onClick={() => setShowMap(!showMap)}
+            className="flex items-center gap-1"
+          >
+            <MapPin className="h-4 w-4" />
+            {showMap ? "Hide Map" : "Select on Map"}
+          </Button>
+          
           <Button 
             type="button" 
             variant={useCurrentLocation ? "default" : "outline"} 
             size="sm"
             onClick={toggleUseCurrentLocation}
             disabled={!userLocation}
-            className="text-sm"
+            className="flex items-center gap-1"
           >
+            <Crosshair className="h-4 w-4" />
             {useCurrentLocation ? "✓ Using Current Location" : "Use My Current Location"}
           </Button>
           
@@ -279,6 +391,29 @@ export default function SuggestLocationForm() {
             </p>
           )}
         </div>
+        
+        {/* Map for location selection */}
+        {showMap && (
+          <div className="mt-2 border rounded-md overflow-hidden" style={{ height: "300px" }}>
+            <MapContainer 
+              center={mapPosition || defaultCenter} 
+              zoom={13} 
+              style={{ height: "100%", width: "100%" }}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              <LocationMarker 
+                position={mapPosition} 
+                setPosition={setMapPosition} 
+              />
+            </MapContainer>
+            <p className="text-xs text-center mt-1 text-muted-foreground">
+              Click on the map to set the exact location
+            </p>
+          </div>
+        )}
         
         {/* Photo Upload */}
         <div className="space-y-2 mt-4">

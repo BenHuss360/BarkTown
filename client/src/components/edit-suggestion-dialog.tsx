@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
@@ -7,6 +7,13 @@ import { apiRequest } from "@/lib/queryClient";
 import { insertLocationSuggestionSchema } from "@shared/schema";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { MapPin } from "lucide-react";
+import { 
+  MapContainer, 
+  TileLayer, 
+  Marker, 
+  useMapEvents 
+} from "react-leaflet";
 
 import {
   Dialog,
@@ -42,6 +49,27 @@ const suggestionSchema = insertLocationSuggestionSchema.extend({
 
 type SuggestionFormValues = z.infer<typeof suggestionSchema>;
 
+// Map marker component for EditSuggestionDialog
+function LocationMarker({ position, setPosition }: { 
+  position: [number, number] | null;
+  setPosition: (pos: [number, number]) => void;
+}) {
+  const map = useMapEvents({
+    click(e) {
+      setPosition([e.latlng.lat, e.latlng.lng]);
+    },
+  });
+
+  // Center map on selected position
+  useEffect(() => {
+    if (position) {
+      map.flyTo(position, map.getZoom());
+    }
+  }, [position, map]);
+
+  return position ? <Marker position={position} /> : null;
+}
+
 interface EditSuggestionDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -57,6 +85,11 @@ export default function EditSuggestionDialog({
 }: EditSuggestionDialogProps) {
   const { toast } = useToast();
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [showMap, setShowMap] = useState(false);
+  const [mapPosition, setMapPosition] = useState<[number, number] | null>(null);
+  
+  // Default map center (London)
+  const defaultCenter: [number, number] = [51.505, -0.09];
 
   // Form setup
   const form = useForm<SuggestionFormValues>({
@@ -74,6 +107,21 @@ export default function EditSuggestionDialog({
       photoUrl: suggestion.photoUrl || undefined,
     },
   });
+  
+  // Initialize map position from suggestion coordinates
+  useEffect(() => {
+    if (suggestion.latitude && suggestion.longitude) {
+      setMapPosition([suggestion.latitude, suggestion.longitude]);
+    }
+  }, [suggestion]);
+  
+  // Update form when map position changes
+  useEffect(() => {
+    if (mapPosition) {
+      form.setValue("latitude", mapPosition[0]);
+      form.setValue("longitude", mapPosition[1]);
+    }
+  }, [mapPosition, form]);
 
   // Mutation for updating suggestion
   const { mutate, isPending } = useMutation({
@@ -216,7 +264,11 @@ export default function EditSuggestionDialog({
                         onChange={(e) => {
                           const value = e.target.value === "" ? undefined : parseFloat(e.target.value);
                           field.onChange(value);
+                          if (value !== null && mapPosition?.[1]) {
+                            setMapPosition([value, mapPosition[1]]);
+                          }
                         }}
+                        readOnly={showMap}
                       />
                     </FormControl>
                     <FormMessage />
@@ -238,7 +290,11 @@ export default function EditSuggestionDialog({
                         onChange={(e) => {
                           const value = e.target.value === "" ? undefined : parseFloat(e.target.value);
                           field.onChange(value);
+                          if (value !== null && mapPosition?.[0]) {
+                            setMapPosition([mapPosition[0], value]);
+                          }
                         }}
+                        readOnly={showMap}
                       />
                     </FormControl>
                     <FormMessage />
@@ -246,6 +302,43 @@ export default function EditSuggestionDialog({
                 )}
               />
             </div>
+            
+            {/* Map toggle button */}
+            <div className="mt-2">
+              <Button 
+                type="button" 
+                variant={showMap ? "default" : "outline"} 
+                size="sm"
+                onClick={() => setShowMap(!showMap)}
+                className="flex items-center gap-1"
+              >
+                <MapPin className="h-4 w-4" />
+                {showMap ? "Hide Map" : "Select on Map"}
+              </Button>
+            </div>
+            
+            {/* Map for location selection */}
+            {showMap && (
+              <div className="mt-2 border rounded-md overflow-hidden" style={{ height: "250px" }}>
+                <MapContainer 
+                  center={mapPosition || defaultCenter} 
+                  zoom={13} 
+                  style={{ height: "100%", width: "100%" }}
+                >
+                  <TileLayer
+                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                    url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                  />
+                  <LocationMarker 
+                    position={mapPosition} 
+                    setPosition={setMapPosition} 
+                  />
+                </MapContainer>
+                <p className="text-xs text-center mt-1 text-muted-foreground">
+                  Click on the map to set the exact location
+                </p>
+              </div>
+            )}
 
             {suggestion.photoUrl && (
               <div className="mt-2">
