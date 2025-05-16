@@ -71,33 +71,32 @@ export default function Home() {
     }
   };
   
-  // Load more locations when user scrolls to the bottom
-  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
-    const [entry] = entries;
-    if (entry.isIntersecting && filteredLocations && displayCount < filteredLocations.length) {
-      // Load 8 more locations when scrolling to the bottom
-      setDisplayCount(prev => prev + 8);
-    }
-  }, [filteredLocations, displayCount]);
-  
-  // Set up intersection observer for infinite scrolling
-  useEffect(() => {
-    const observer = new IntersectionObserver(handleObserver, {
-      root: null,
-      rootMargin: '0px',
-      threshold: 0.1
-    });
-    
-    if (listEndRef.current) {
-      observer.observe(listEndRef.current);
-    }
-    
-    return () => {
-      if (listEndRef.current) {
-        observer.unobserve(listEndRef.current);
+  // Handle scroll event to load more items
+  const handleScroll = useCallback(() => {
+    if (viewMode === 'list' && filteredLocations && displayCount < filteredLocations.length) {
+      const scrollContainer = document.querySelector('.location-scroll-container');
+      if (scrollContainer) {
+        const { scrollTop, scrollHeight, clientHeight } = scrollContainer;
+        
+        // When user is near the bottom (within 200px), load more items
+        if (scrollHeight - scrollTop - clientHeight < 200) {
+          console.log("Loading more locations...", displayCount, "->", displayCount + 8);
+          setDisplayCount(prevCount => prevCount + 8);
+        }
       }
-    };
-  }, [handleObserver, listEndRef]);
+    }
+  }, [viewMode, filteredLocations, displayCount]);
+  
+  // Set up scroll event listener
+  useEffect(() => {
+    const scrollContainer = document.querySelector('.location-scroll-container');
+    if (scrollContainer && viewMode === 'list') {
+      scrollContainer.addEventListener('scroll', handleScroll);
+      return () => {
+        scrollContainer.removeEventListener('scroll', handleScroll);
+      };
+    }
+  }, [handleScroll, viewMode]);
   
   return (
     <div className="flex flex-col h-full">
@@ -141,7 +140,7 @@ export default function Home() {
               Map View
             </button>
           </div>
-          <div className="px-4 pt-2 pb-4 overflow-y-auto" style={{ height: "calc(100% - 40px)" }}>
+          <div className="location-scroll-container px-4 pt-2 pb-4 overflow-y-auto" style={{ height: "calc(100% - 40px)" }}>
             <h2 className="text-xl font-bold mb-4">Nearby Dog-Friendly Places</h2>
             
             {isLoading ? (
@@ -155,15 +154,18 @@ export default function Home() {
                   <LocationCard key={location.id} location={location} />
                 ))}
                 
-                {/* Infinite scroll loading indicator */}
+                {/* Display a "Load More" button instead of infinite scroll */}
                 {displayCount < filteredLocations.length && (
                   <div className="flex justify-center items-center py-4">
-                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                    <button 
+                      onClick={() => setDisplayCount(prev => prev + 8)}
+                      className="bg-primary text-white px-4 py-2 rounded-lg flex items-center gap-2"
+                    >
+                      Load More
+                      <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></span>
+                    </button>
                   </div>
                 )}
-                
-                {/* Observer element for infinite scrolling */}
-                <div ref={listEndRef} className="h-4" />
               </>
             ) : (
               <div className="text-center py-8">
