@@ -199,6 +199,8 @@ export class MemStorage implements IStorage {
   
   // Initialize sample data
   private initSampleData() {
+    // Sample reviews (to be added after sample locations)
+    
     // Sample locations
     const sampleLocations: InsertLocation[] = [
       {

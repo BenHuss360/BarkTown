@@ -27,7 +27,7 @@ export default function Saved() {
   }, [userId]);
   
   // Fetch user's favorite locations
-  const { data: favorites = [], isLoading, error } = useQuery({
+  const { data: favorites = [], isLoading, error } = useQuery<Location[]>({
     queryKey: [`/api/favorites/${userId}`],
     staleTime: 0, // Always refetch when query is invalidated
     retry: 2,

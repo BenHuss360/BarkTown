@@ -76,8 +76,9 @@ export default function ReviewForm({ locationId, onSuccess, existingReview }: Re
       return apiRequest("POST", "/api/reviews", data);
     },
     onSuccess: () => {
+      // Invalidate all relevant queries to refresh data
       queryClient.invalidateQueries({ queryKey: [`/api/locations/${locationId}/reviews`] });
-      queryClient.invalidateQueries({ queryKey: [`/api/users/${user?.id || 1}/locations/${locationId}/review`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/users/${userHasId(user) ? user.id : 1}/locations/${locationId}/review`] });
       toast({
         title: "Review submitted",
         description: "Thank you for sharing your experience!",
