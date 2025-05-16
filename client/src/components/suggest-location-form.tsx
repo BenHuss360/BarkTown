@@ -307,86 +307,53 @@ export default function SuggestLocationForm() {
           )}
         />
         
-        {/* Coordinates display */}
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="latitude"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Latitude</FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field} 
-                    value={field.value?.toString() || ''} 
-                    onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
-                      field.onChange(value);
-                      if (value !== null && mapPosition?.[1]) {
-                        setMapPosition([value, mapPosition[1]]);
-                      }
-                    }}
-                    readOnly={showMap}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="longitude"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Longitude</FormLabel>
-                <FormControl>
-                  <Input 
-                    {...field} 
-                    value={field.value?.toString() || ''} 
-                    onChange={(e) => {
-                      const value = e.target.value === '' ? null : parseFloat(e.target.value);
-                      field.onChange(value);
-                      if (value !== null && mapPosition?.[0]) {
-                        setMapPosition([mapPosition[0], value]);
-                      }
-                    }}
-                    readOnly={showMap}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
-
-        {/* Map toggle and current location */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button 
-            type="button" 
-            variant={showMap ? "default" : "outline"} 
-            size="sm"
-            onClick={() => setShowMap(!showMap)}
-            className="flex items-center gap-1"
-          >
-            <MapPin className="h-4 w-4" />
-            {showMap ? "Hide Map" : "Select on Map"}
-          </Button>
+        {/* Location selection section */}
+        <div className="p-4 bg-card rounded-xl border border-border">
+          <h3 className="font-medium mb-3">Location</h3>
           
-          <Button 
-            type="button" 
-            variant={useCurrentLocation ? "default" : "outline"} 
-            size="sm"
-            onClick={toggleUseCurrentLocation}
-            disabled={!userLocation}
-            className="flex items-center gap-1"
-          >
-            <Crosshair className="h-4 w-4" />
-            {useCurrentLocation ? "✓ Using Current Location" : "Use My Current Location"}
-          </Button>
+          {mapPosition && (
+            <div className="mb-3 p-2 bg-muted rounded-md text-sm">
+              <p className="flex items-center gap-1">
+                <MapPin className="h-4 w-4 text-primary" /> 
+                <span>Location selected</span>
+                {useCurrentLocation && <span className="ml-1 text-green-600 dark:text-green-400">(using your current position)</span>}
+              </p>
+            </div>
+          )}
           
-          {!userLocation && (
-            <p className="text-xs text-orange-600 dark:text-orange-400">
-              Enable location services to use this feature
+          {/* Hidden coordinate inputs */}
+          <input type="hidden" {...form.register("latitude")} />
+          <input type="hidden" {...form.register("longitude")} />
+          
+          {/* Map toggle and current location */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Button 
+              type="button" 
+              variant={showMap ? "default" : "outline"} 
+              size="sm"
+              onClick={() => setShowMap(!showMap)}
+              className="flex items-center gap-1"
+            >
+              <MapPin className="h-4 w-4" />
+              {showMap ? "Hide Map" : "Select on Map"}
+            </Button>
+            
+            <Button 
+              type="button" 
+              variant={useCurrentLocation ? "default" : "outline"} 
+              size="sm"
+              onClick={toggleUseCurrentLocation}
+              disabled={!userLocation}
+              className="flex items-center gap-1"
+            >
+              <Crosshair className="h-4 w-4" />
+              {useCurrentLocation ? "✓ Using Current Location" : "Use My Current Location"}
+            </Button>
+          </div>
+          
+          {!userLocation && !mapPosition && (
+            <p className="text-xs text-orange-600 dark:text-orange-400 mt-2">
+              Please either enable location services or select a position on the map
             </p>
           )}
         </div>

@@ -4,27 +4,27 @@
 
 :root {
   /* Base colors - colorblind friendly */
-  --background: 0 0% 100%;
-  --foreground: 0 0% 10%;
-  --muted: 60 4.8% 95.9%;
-  --muted-foreground: 25 5.3% 44.7%;
-  --popover: 0 0% 100%;
-  --popover-foreground: 0 0% 10%;
+  --background: 40 30% 98%;
+  --foreground: 20 15% 15%;
+  --muted: 40 10% 96%;
+  --muted-foreground: 25 5% 44.7%;
+  --popover: 40 30% 98%;
+  --popover-foreground: 20 15% 15%;
   --card: 0 0% 100%;
-  --card-foreground: 0 0% 10%;
-  --border: 0 0% 90%;
-  --input: 0 0% 90%;
+  --card-foreground: 20 15% 15%;
+  --border: 30 15% 90%;
+  --input: 30 15% 94%;
   
-  /* Primary: iOS Blue - colorblind friendly */
-  --primary: 210 100% 50%;
+  /* Primary: Warm Brown - poodle-themed, colorblind friendly */
+  --primary: 25 70% 45%;
   --primary-foreground: 0 0% 100%;
   
-  /* Secondary: iOS Yellow - colorblind friendly */
-  --secondary: 45 100% 50%;
-  --secondary-foreground: 0 0% 10%;
+  /* Secondary: Soft caramel - colorblind friendly */
+  --secondary: 35 85% 65%;
+  --secondary-foreground: 20 15% 15%;
   
-  /* Success: iOS Green - adjusted for colorblindness */
-  --success: 142 70% 45%;
+  /* Success: Forest Green - adjusted for colorblindness */
+  --success: 142 60% 40%;
   --success-foreground: 0 0% 100%;
   
   /* Error: Adjusted for deuteranopia and protanopia */
@@ -61,27 +61,27 @@
 }
 
 .dark {
-  --background: 240 10% 3.9%;
-  --foreground: 0 0% 98%;
-  --muted: 240 3.7% 15.9%;
-  --muted-foreground: 240 5% 64.9%;
-  --popover: 240 10% 3.9%;
-  --popover-foreground: 0 0% 98%;
-  --card: 240 10% 3.9%;
-  --card-foreground: 0 0% 98%;
-  --border: 240 3.7% 15.9%;
-  --input: 240 3.7% 15.9%;
+  --background: 20 20% 8%;
+  --foreground: 40 15% 94%;
+  --muted: 25 15% 15%;
+  --muted-foreground: 30 10% 70%;
+  --popover: 20 20% 8%;
+  --popover-foreground: 40 15% 94%;
+  --card: 25 20% 12%;
+  --card-foreground: 40 15% 94%;
+  --border: 25 15% 20%;
+  --input: 25 15% 20%;
   
-  /* Primary: iOS Blue - colorblind friendly */
-  --primary: 210 100% 50%;
+  /* Primary: Warm Caramel - poodle-themed, colorblind friendly */
+  --primary: 25 90% 55%;
   --primary-foreground: 0 0% 100%;
   
-  /* Secondary: iOS Yellow - colorblind friendly */
-  --secondary: 45 100% 50%;
-  --secondary-foreground: 0 0% 10%;
+  /* Secondary: Light tan - colorblind friendly */
+  --secondary: 35 70% 50%;
+  --secondary-foreground: 20 15% 10%;
   
-  /* Success: iOS Green - adjusted for colorblindness */
-  --success: 142 70% 45%;
+  /* Success: Forest Green - adjusted for colorblindness */
+  --success: 142 65% 45%;
   --success-foreground: 0 0% 100%;
   
   /* Error: Adjusted for deuteranopia and protanopia */
