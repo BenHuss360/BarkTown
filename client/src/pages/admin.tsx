@@ -10,10 +10,23 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ShieldCheck, Edit } from "lucide-react";
+import { ShieldCheck, Edit, MapPin, Phone, Clock, Info } from "lucide-react";
 
-// Only user ID 1 has admin access
+// Only ben@immersi.co.uk has admin access
 const ADMIN_ID = 1;
+
+// Interface for editing database locations
+interface LocationEditFormValues {
+  name: string;
+  description: string;
+  category: string;
+  address: string;
+  features: string;
+  phoneNumber?: string;
+  website?: string;
+  hours?: string;
+  photoUrl?: string;
+}
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -48,7 +61,7 @@ export default function AdminPage() {
     },
     onSuccess: (data, variables) => {
       // Refetch suggestions to update the list
-      refetch();
+      refetchSuggestions();
       
       // Also invalidate the locations cache to refresh the main map view
       queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
@@ -126,7 +139,7 @@ export default function AdminPage() {
         
         {/* Tabs for filtering suggestions */}
         <Tabs defaultValue="pending" onValueChange={setActiveTab} className="mb-4">
-          <TabsList className="w-full grid grid-cols-3">
+          <TabsList className="w-full grid grid-cols-4">
             <TabsTrigger value="pending">
               Pending
               <Badge variant="outline" className="ml-2">
@@ -143,6 +156,12 @@ export default function AdminPage() {
               Rejected
               <Badge variant="outline" className="ml-2">
                 {suggestions.filter(s => s.status === "rejected").length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="all_locations">
+              All Locations
+              <Badge variant="outline" className="ml-2">
+                {allLocations.length}
               </Badge>
             </TabsTrigger>
           </TabsList>
@@ -197,6 +216,24 @@ export default function AdminPage() {
                     suggestion={suggestion}
                     onStatusUpdate={handleStatusUpdate}
                     showApprove={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          
+          {/* New tab content for showing all locations in the database */}
+          <TabsContent value="all_locations" className="mt-4">
+            {allLocations.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No locations found in the database.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {allLocations.map((location) => (
+                  <DatabaseLocationCard 
+                    key={location.id}
+                    location={location}
                   />
                 ))}
               </div>
@@ -324,6 +361,137 @@ function SuggestionCard({
           queryClient.invalidateQueries({ queryKey: ['/api/suggestions'] });
         }}
       />
+    </Card>
+  );
+}
+
+// Component for displaying and editing database locations
+interface DatabaseLocationCardProps {
+  location: any;
+}
+
+function DatabaseLocationCard({ location }: DatabaseLocationCardProps) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const { toast } = useToast();
+  
+  // Mutation for updating a location
+  const updateLocationMutation = useMutation({
+    mutationFn: (data: any) => {
+      return apiRequest("PUT", `/api/locations/${location.id}`, data);
+    },
+    onSuccess: () => {
+      toast({
+        title: "Location Updated",
+        description: "The location has been updated successfully.",
+      });
+      
+      // Refetch locations to update the list
+      queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+      setIsEditDialogOpen(false);
+    },
+    onError: (error) => {
+      console.error("Error updating location:", error);
+      toast({
+        title: "Update Failed",
+        description: "There was a problem updating the location.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  return (
+    <Card className="p-4">
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="text-lg font-medium">{location.name}</h3>
+        <Badge className="capitalize">
+          {location.category}
+        </Badge>
+      </div>
+      
+      <div className="mb-3">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
+          <MapPin className="h-3.5 w-3.5 text-gray-500" /> Address:
+        </div>
+        <p className="text-sm">{location.address}</p>
+      </div>
+      
+      <div className="mb-3">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
+          <Info className="h-3.5 w-3.5 text-gray-500" /> Description:
+        </div>
+        <p className="text-sm">{location.description}</p>
+      </div>
+      
+      <div className="mb-3">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Dog-friendly Features:</div>
+        <p className="text-sm">{location.features}</p>
+      </div>
+      
+      {/* Contact info if available */}
+      {location.phoneNumber && (
+        <div className="mb-3">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
+            <Phone className="h-3.5 w-3.5 text-gray-500" /> Phone:
+          </div>
+          <p className="text-sm">{location.phoneNumber}</p>
+        </div>
+      )}
+      
+      {/* Hours if available */}
+      {location.hours && (
+        <div className="mb-3">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1 flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5 text-gray-500" /> Hours:
+          </div>
+          <p className="text-sm">{location.hours}</p>
+        </div>
+      )}
+      
+      {/* Show coordinates */}
+      <div className="mb-3">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Coordinates:</div>
+        <p className="text-sm">
+          {location.latitude.toFixed(6)}, {location.longitude.toFixed(6)}
+        </p>
+      </div>
+      
+      {/* Photo preview */}
+      {location.photoUrl && (
+        <div className="mb-3">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Photo:</div>
+          <img 
+            src={location.photoUrl} 
+            alt={location.name}
+            className="w-full h-32 object-cover rounded-md"
+          />
+        </div>
+      )}
+      
+      {/* Edit button */}
+      <div className="flex justify-end mt-2">
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setIsEditDialogOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <Edit className="h-3.5 w-3.5" />
+          Edit Location
+        </Button>
+      </div>
+      
+      {/* Edit Location Dialog - reusing EditSuggestionDialog since fields are similar */}
+      {isEditDialogOpen && (
+        <EditSuggestionDialog 
+          isOpen={isEditDialogOpen}
+          onClose={() => setIsEditDialogOpen(false)}
+          suggestion={location}
+          onSuccess={() => {
+            // Refresh the locations list
+            queryClient.invalidateQueries({ queryKey: ['/api/locations'] });
+          }}
+        />
+      )}
     </Card>
   );
 }
