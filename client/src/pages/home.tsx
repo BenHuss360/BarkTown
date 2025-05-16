@@ -76,8 +76,8 @@ export default function Home() {
           </div>
         </div>
       ) : (
-        <div className="relative">
-          <div className="absolute top-4 right-4 z-10">
+        <div className="relative flex-1" style={{ height: "calc(100vh - 148px)" }}>
+          <div className="sticky top-0 pt-4 pr-4 z-50 flex justify-end">
             <button 
               onClick={toggleViewMode}
               aria-label="Switch to map view"
@@ -86,7 +86,7 @@ export default function Home() {
               Map View
             </button>
           </div>
-          <div className="px-4 py-4 overflow-y-auto h-full">
+          <div className="px-4 pt-2 pb-4 overflow-y-auto h-full">
             <h2 className="text-xl font-bold mb-4">Nearby Dog-Friendly Places</h2>
             
             {isLoading ? (
