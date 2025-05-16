@@ -9,35 +9,60 @@ import L from 'leaflet';
 // Import leaflet CSS directly
 import 'leaflet/dist/leaflet.css';
 
-// Function to create category-specific marker icons
+// Define paw marker icon
+const pawIcon = L.icon({
+  iconUrl: '/paw-marker.svg',
+  iconSize: [32, 32],
+  iconAnchor: [16, 32],
+  popupAnchor: [0, -32]
+});
+
+// Function to create category-specific paw markers
 const createMarkerIcon = (category: string) => {
-  let bgColor = "#007AFF"; // Default blue for unknown categories
-  let icon = `<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>`;
+  // Use different colors for the SVG filters to colorize the paw markers
+  let filterColor = "";
   
   switch(category) {
     case "restaurant":
-      bgColor = "#FF9500"; // Orange
-      icon = `<path d="M16 2H8v2h8zM3 6h18v2H3z"></path><path d="M4 10v10h4V10zM16 10v10h4V10zM8 10v10h8V10z"></path>`;
-      break;
+      // Orange-brown paw
+      return L.divIcon({
+        className: "custom-marker",
+        html: `<div class="paw-marker" style="filter: sepia(100%) saturate(300%) brightness(70%) hue-rotate(350deg);"><img src="/paw-marker.svg" alt="Restaurant" width="32" height="32"/></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
     case "cafe":
-      bgColor = "#AF52DE"; // Purple
-      icon = `<path d="M18 5H4a2 2 0 00-2 2v8a4 4 0 004 4h8a4 4 0 004-4V7a2 2 0 00-2-2z"></path><line x1="4" y1="5" x2="4" y2="2"></line><line x1="12" y1="5" x2="12" y2="2"></line><line x1="20" y1="5" x2="20" y2="2"></line>`;
-      break;
+      // Purple-brown paw
+      return L.divIcon({
+        className: "custom-marker",
+        html: `<div class="paw-marker" style="filter: sepia(50%) saturate(300%) hue-rotate(230deg);"><img src="/paw-marker.svg" alt="Cafe" width="32" height="32"/></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
     case "park":
-      bgColor = "#34C759"; // Green
-      icon = `<path d="M8 9l4-4 4 4"></path><path d="M12 5v14"></path><path d="M4 14h16"></path><path d="M4 17h16"></path>`;
-      break;
+      // Green-brown paw
+      return L.divIcon({
+        className: "custom-marker",
+        html: `<div class="paw-marker" style="filter: sepia(90%) saturate(200%) hue-rotate(50deg);"><img src="/paw-marker.svg" alt="Park" width="32" height="32"/></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
     case "shop":
-      bgColor = "#5856D6"; // Indigo
-      icon = `<path d="M20 10a4 4 0 01-4 4H8a4 4 0 01-4-4"></path><path d="M20 10v10H4V10"></path><path d="M18 10V7a6 6 0 00-12 0v3"></path>`;
-      break;
+      // Blue-brown paw
+      return L.divIcon({
+        className: "custom-marker",
+        html: `<div class="paw-marker" style="filter: sepia(80%) saturate(300%) hue-rotate(170deg);"><img src="/paw-marker.svg" alt="Shop" width="32" height="32"/></div>`,
+        iconSize: [32, 32],
+        iconAnchor: [16, 32],
+        popupAnchor: [0, -32]
+      });
+    default:
+      // Default brown paw
+      return pawIcon;
   }
-  
-  return L.divIcon({
-    className: "custom-marker",
-    html: `<div style="background-color: ${bgColor}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></div>`,
-    iconSize: [24, 24]
-  });
 };
 
 interface MapViewProps {
@@ -157,18 +182,22 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* User location marker - with custom icon */}
+        {/* User location marker - with custom paw icon */}
         <Marker 
           position={position}
           icon={L.divIcon({
             className: "user-location-marker",
-            html: `<div style="background-color: #007AFF; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
-            iconSize: [22, 22],
-            iconAnchor: [11, 11]
+            html: `<div class="paw-marker" style="filter: brightness(130%) saturate(150%);"><img src="/paw-marker-selected.svg" alt="Your location" width="42" height="42"/></div>`,
+            iconSize: [42, 42],
+            iconAnchor: [21, 42],
+            popupAnchor: [0, -42]
           })}
         >
           <Popup>
-            Your current location
+            <div className="text-center">
+              <strong>Your current location</strong>
+              <p className="text-xs mt-1">This is where you are now</p>
+            </div>
           </Popup>
         </Marker>
         
