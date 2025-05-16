@@ -247,12 +247,21 @@ export class MemStorage implements IStorage {
     // Ensure latitude and longitude are null if not provided
     const latitude = insertSuggestion.latitude !== undefined ? insertSuggestion.latitude : null;
     const longitude = insertSuggestion.longitude !== undefined ? insertSuggestion.longitude : null;
+    // Ensure photoUrl is null if not provided
+    const photoUrl = insertSuggestion.photoUrl || null;
     
+    // Create a fresh suggestion object with all required fields
     const suggestion: LocationSuggestion = { 
-      ...insertSuggestion,
+      id,
+      name: insertSuggestion.name,
+      description: insertSuggestion.description,
+      category: insertSuggestion.category,
+      address: insertSuggestion.address,
       latitude,
-      longitude, 
-      id, 
+      longitude,
+      features: insertSuggestion.features,
+      userId: insertSuggestion.userId,
+      photoUrl,
       status, 
       createdAt 
     };

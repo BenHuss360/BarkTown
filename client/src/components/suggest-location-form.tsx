@@ -33,6 +33,7 @@ const locationSchema = insertLocationSuggestionSchema.extend({
   description: z.string().min(10, "Description must be at least 10 characters"),
   address: z.string().min(5, "Address must be at least 5 characters"),
   features: z.string().min(3, "Features must be at least 3 characters"),
+  photoUrl: z.string().optional(),
 });
 
 // Type for form values
@@ -43,6 +44,8 @@ export default function SuggestLocationForm() {
   const { user } = useAuth();
   const { userLocation } = useLocation();
   const [useCurrentLocation, setUseCurrentLocation] = useState(false);
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
   
   // Create form
   const form = useForm<LocationFormValues>({
@@ -56,12 +59,41 @@ export default function SuggestLocationForm() {
       latitude: null,
       longitude: null,
       userId: user?.id || 1,
+      photoUrl: "",
     },
   });
+  
+  // Handle photo upload
+  const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setPhotoFile(file);
+      
+      // Create a preview
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setPhotoPreview(reader.result as string);
+        // Store a placeholder URL in the form
+        form.setValue("photoUrl", "temp-photo-url");
+      };
+      reader.readAsDataURL(file);
+    }
+  };
   
   // Set up mutation
   const submitMutation = useMutation({
     mutationFn: (data: LocationFormValues) => {
+      // In a real app, you would upload the photo to a storage service first
+      // and then attach the URL to the data
+      
+      // Simulate photo URL in this demo
+      if (photoFile) {
+        // In a real app, this would be the URL returned from your image upload service
+        data.photoUrl = photoPreview || "";
+      } else {
+        data.photoUrl = "";
+      }
+      
       return apiRequest("POST", `/api/locations/suggest`, data);
     },
     onSuccess: () => {

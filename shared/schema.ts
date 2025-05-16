@@ -73,6 +73,7 @@ export const locationSuggestions = pgTable("location_suggestions", {
   longitude: doublePrecision("longitude"),
   features: text("features").notNull(),
   userId: integer("user_id").notNull(),
+  photoUrl: text("photo_url"), // Optional photo upload
   status: text("status").default("pending").notNull(), // pending, approved, rejected
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
