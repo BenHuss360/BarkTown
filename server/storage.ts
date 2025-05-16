@@ -1,7 +1,8 @@
 import { 
   users, type User, type InsertUser, 
   locations, type Location, type InsertLocation,
-  favorites, type Favorite, type InsertFavorite
+  favorites, type Favorite, type InsertFavorite,
+  reviews, type Review, type InsertReview
 } from "@shared/schema";
 
 export interface IStorage {
@@ -22,15 +23,26 @@ export interface IStorage {
   addFavorite(favorite: InsertFavorite): Promise<Favorite>;
   removeFavorite(userId: number, locationId: number): Promise<boolean>;
   isFavorite(userId: number, locationId: number): Promise<boolean>;
+  
+  // Reviews
+  getReviewsByLocationId(locationId: number): Promise<Review[]>;
+  getUserReviews(userId: number): Promise<Review[]>;
+  addReview(review: InsertReview): Promise<Review>;
+  updateReview(id: number, review: Partial<InsertReview>): Promise<Review | undefined>;
+  deleteReview(id: number): Promise<boolean>;
+  getReview(id: number): Promise<Review | undefined>;
+  getUserReviewForLocation(userId: number, locationId: number): Promise<Review | undefined>;
 }
 
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private locations: Map<number, Location>;
   private favorites: Map<number, Favorite>;
+  private reviews: Map<number, Review>;
   private userIdCounter: number;
   private locationIdCounter: number;
   private favoriteIdCounter: number;
+  private reviewIdCounter: number;
 
   constructor() {
     this.users = new Map();
