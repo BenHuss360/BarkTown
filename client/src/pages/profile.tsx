@@ -29,9 +29,9 @@ export default function Profile() {
   const pendingSuggestions = suggestionsData.filter((s: any) => s.status === "pending").length;
   const approvedSuggestions = suggestionsData.filter((s: any) => s.status === "approved").length;
   
-  // Admin users - in a real app, this would come from a database with roles
-  const ADMIN_IDS = [1, 2]; // Example admin user IDs
-  const isAdmin = user && ADMIN_IDS.includes(user.id);
+  // Only user ID 1 has admin access
+  const ADMIN_ID = 1; // Only this specific user has admin access
+  const isAdmin = user && user.id === ADMIN_ID;
   
   const handleSignIn = async () => {
     try {

@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import SearchBar from "@/components/search-bar";
 import CategoryFilters from "@/components/category-filters";
@@ -12,6 +12,10 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"map" | "list">("map");
+  const [displayCount, setDisplayCount] = useState<number>(8); // Initial display count
+  
+  // Reference for infinite scroll detection
+  const listEndRef = useRef<HTMLDivElement>(null);
   
   // Get user location from context
   const { userLocation, calculateDistance } = useLocation();
@@ -61,7 +65,39 @@ export default function Home() {
   
   const toggleViewMode = () => {
     setViewMode(viewMode === "map" ? "list" : "map");
+    // Reset display count when switching back to list view
+    if (viewMode === "map") {
+      setDisplayCount(8);
+    }
   };
+  
+  // Load more locations when user scrolls to the bottom
+  const handleObserver = useCallback((entries: IntersectionObserverEntry[]) => {
+    const [entry] = entries;
+    if (entry.isIntersecting && filteredLocations && displayCount < filteredLocations.length) {
+      // Load 8 more locations when scrolling to the bottom
+      setDisplayCount(prev => prev + 8);
+    }
+  }, [filteredLocations, displayCount]);
+  
+  // Set up intersection observer for infinite scrolling
+  useEffect(() => {
+    const observer = new IntersectionObserver(handleObserver, {
+      root: null,
+      rootMargin: '0px',
+      threshold: 0.1
+    });
+    
+    if (listEndRef.current) {
+      observer.observe(listEndRef.current);
+    }
+    
+    return () => {
+      if (listEndRef.current) {
+        observer.unobserve(listEndRef.current);
+      }
+    };
+  }, [handleObserver, listEndRef]);
   
   return (
     <div className="flex flex-col h-full">
@@ -113,9 +149,22 @@ export default function Home() {
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
               </div>
             ) : filteredLocations?.length ? (
-              filteredLocations.map((location: Location) => (
-                <LocationCard key={location.id} location={location} />
-              ))
+              <>
+                {/* Display only a portion of locations for better performance */}
+                {filteredLocations.slice(0, displayCount).map((location: Location) => (
+                  <LocationCard key={location.id} location={location} />
+                ))}
+                
+                {/* Infinite scroll loading indicator */}
+                {displayCount < filteredLocations.length && (
+                  <div className="flex justify-center items-center py-4">
+                    <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+                  </div>
+                )}
+                
+                {/* Observer element for infinite scrolling */}
+                <div ref={listEndRef} className="h-4" />
+              </>
             ) : (
               <div className="text-center py-8">
                 <p>No locations found. Try a different search or category.</p>
