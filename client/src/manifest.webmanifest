@@ -1,0 +1,19 @@
+{
+  "name": "PawPlaces - Find Dog-Friendly Locations",
+  "short_name": "PawPlaces",
+  "description": "Find dog-friendly locations like restaurants, cafes, parks, and shops near you",
+  "theme_color": "#007AFF",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "orientation": "portrait",
+  "scope": "/",
+  "start_url": "/",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/6845/6845725.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

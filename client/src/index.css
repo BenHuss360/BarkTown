@@ -1,0 +1,174 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Base colors - colorblind friendly */
+  --background: 0 0% 100%;
+  --foreground: 0 0% 10%;
+  --muted: 60 4.8% 95.9%;
+  --muted-foreground: 25 5.3% 44.7%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 10%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 10%;
+  --border: 0 0% 90%;
+  --input: 0 0% 90%;
+  
+  /* Primary: iOS Blue - colorblind friendly */
+  --primary: 210 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary: iOS Yellow - colorblind friendly */
+  --secondary: 45 100% 50%;
+  --secondary-foreground: 0 0% 10%;
+  
+  /* Success: iOS Green - adjusted for colorblindness */
+  --success: 142 70% 45%;
+  --success-foreground: 0 0% 100%;
+  
+  /* Error: Adjusted for deuteranopia and protanopia */
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Accent */
+  --accent: 60 4.8% 95.9%;
+  --accent-foreground: 0 0% 10%;
+  
+  /* Additional */
+  --ring: 210 100% 50%;
+  --radius: 0.75rem;
+  
+  /* Charts */
+  --chart-1: 210 100% 50%;
+  --chart-2: 45 100% 50%;
+  --chart-3: 142 70% 45%;
+  --chart-4: 0 100% 50%;
+  --chart-5: 270 60% 50%;
+  
+  /* Sidebar (not used but required by shadcn) */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 10%;
+  --sidebar-primary: 210 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 60 4.8% 95.9%;
+  --sidebar-accent-foreground: 0 0% 10%;
+  --sidebar-border: 0 0% 90%;
+  --sidebar-ring: 210 100% 50%;
+}
+
+.dark {
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --popover: 240 10% 3.9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  
+  /* Primary: iOS Blue - colorblind friendly */
+  --primary: 210 100% 50%;
+  --primary-foreground: 0 0% 100%;
+  
+  /* Secondary: iOS Yellow - colorblind friendly */
+  --secondary: 45 100% 50%;
+  --secondary-foreground: 0 0% 10%;
+  
+  /* Success: iOS Green - adjusted for colorblindness */
+  --success: 142 70% 45%;
+  --success-foreground: 0 0% 100%;
+  
+  /* Error: Adjusted for deuteranopia and protanopia */
+  --destructive: 0 100% 50%;
+  --destructive-foreground: 0 0% 100%;
+  
+  /* Accent */
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  
+  /* Additional */
+  --ring: 210 100% 50%;
+  
+  /* Charts */
+  --chart-1: 210 100% 50%;
+  --chart-2: 45 100% 50%;
+  --chart-3: 142 70% 45%;
+  --chart-4: 0 100% 50%;
+  --chart-5: 270 60% 50%;
+  
+  /* Sidebar (not used but required by shadcn) */
+  --sidebar-background: 240 10% 3.9%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 210 100% 50%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 210 100% 50%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  html, body, #root {
+    @apply h-full w-full;
+  }
+  
+  body {
+    @apply font-sans bg-background text-foreground antialiased;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-touch-callout: none;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  
+  /* Default focus styles */
+  :focus {
+    @apply outline-none ring-2 ring-primary ring-offset-2;
+  }
+  
+  /* iOS style buttons */
+  .ios-button {
+    @apply rounded-xl py-3 px-4 font-semibold text-center transition-colors duration-200;
+  }
+  
+  /* iOS style card */
+  .ios-card {
+    @apply bg-card rounded-xl shadow-sm;
+  }
+  
+  /* iOS style search input */
+  .ios-input {
+    @apply bg-muted rounded-xl py-3 px-4 w-full;
+  }
+  
+  /* iOS status bar height */
+  .ios-status-bar {
+    @apply h-6;
+  }
+  
+  /* Map container */
+  .map-container {
+    @apply h-80;
+  }
+  
+  /* Leaflet custom styles */
+  .leaflet-container {
+    @apply h-full w-full z-10;
+  }
+  
+  /* Improves accessibility for people with visual/motor impairments */
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
+}
