@@ -4,12 +4,13 @@ import { useLocation } from "wouter";
 import { useAuth } from "@/contexts/AuthContext";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import LocationHeader from "@/components/location-header";
+import EditSuggestionDialog from "@/components/edit-suggestion-dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { ShieldCheck } from "lucide-react";
+import { ShieldCheck, Edit } from "lucide-react";
 
 // Admin users - in a real app, this would come from a database with roles
 const ADMIN_IDS = [1, 2]; // Example admin user IDs
@@ -215,6 +216,8 @@ function SuggestionCard({
   showApprove = false, 
   showReject = false 
 }: SuggestionCardProps) {
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -258,8 +261,31 @@ function SuggestionCard({
         </div>
       )}
       
+      {/* Optional photo preview */}
+      {suggestion.photoUrl && (
+        <div className="mb-3">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Photo:</div>
+          <img 
+            src={suggestion.photoUrl} 
+            alt={suggestion.name}
+            className="w-full h-32 object-cover rounded-md"
+          />
+        </div>
+      )}
+      
       {/* Action buttons */}
       <div className="flex justify-end space-x-2 mt-2">
+        {/* Edit button */}
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => setIsEditDialogOpen(true)}
+          className="flex items-center gap-1"
+        >
+          <Edit className="h-3.5 w-3.5" />
+          Edit
+        </Button>
+        
         {(suggestion.status === "pending" || showApprove) && (
           <Button 
             size="sm" 
@@ -281,6 +307,17 @@ function SuggestionCard({
           </Button>
         )}
       </div>
+      
+      {/* Edit Suggestion Dialog */}
+      <EditSuggestionDialog 
+        isOpen={isEditDialogOpen}
+        onClose={() => setIsEditDialogOpen(false)}
+        suggestion={suggestion}
+        onSuccess={() => {
+          // Refetch suggestions to update the list with edited content
+          queryClient.invalidateQueries({ queryKey: ['/api/suggestions'] });
+        }}
+      />
     </Card>
   );
 }

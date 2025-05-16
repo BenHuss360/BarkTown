@@ -1,28 +1,30 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useMutation } from "@tanstack/react-query";
 import { z } from "zod";
-import { apiRequest, queryClient } from "@/lib/queryClient";
-import { 
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { apiRequest } from "@/lib/queryClient";
+import { insertLocationSuggestionSchema } from "@shared/schema";
+import { useToast } from "@/hooks/use-toast";
+
+import {
   Dialog,
-  DialogContent, 
-  DialogDescription,
-  DialogFooter,
+  DialogContent,
   DialogHeader,
-  DialogTitle
+  DialogTitle,
+  DialogFooter,
 } from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { 
-  Form, 
-  FormControl, 
-  FormField, 
-  FormItem, 
-  FormLabel, 
-  FormMessage 
-} from "@/components/ui/form";
 import {
   Select,
   SelectContent,
@@ -30,18 +32,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useToast } from "@/hooks/use-toast";
 
-// Schema for validation
-const suggestionSchema = z.object({
-  name: z.string().min(3, "Name must be at least 3 characters"),
-  description: z.string().min(10, "Description must be at least 10 characters"),
-  category: z.string().min(1, "Category is required"),
-  address: z.string().min(5, "Address must be at least 5 characters"),
-  features: z.string().min(3, "Features must be at least 3 characters"),
-  latitude: z.number().nullable(),
-  longitude: z.number().nullable(),
-  photoUrl: z.string().optional(),
+// Form validation schema based on the suggestion schema
+const suggestionSchema = insertLocationSuggestionSchema.extend({
+  id: z.number().optional(),
+  photoUrl: z.string().optional().nullable(),
 });
 
 type SuggestionFormValues = z.infer<typeof suggestionSchema>;
@@ -55,73 +50,67 @@ interface EditSuggestionDialogProps {
 
 export default function EditSuggestionDialog({ 
   isOpen, 
-  onClose,
+  onClose, 
   suggestion,
   onSuccess
 }: EditSuggestionDialogProps) {
   const { toast } = useToast();
-  const [photoPreview, setPhotoPreview] = useState<string | null>(suggestion.photoUrl || null);
-  
-  // Create form
+  const [photoFile, setPhotoFile] = useState<File | null>(null);
+
+  // Form setup
   const form = useForm<SuggestionFormValues>({
     resolver: zodResolver(suggestionSchema),
     defaultValues: {
+      id: suggestion.id,
       name: suggestion.name,
       description: suggestion.description,
-      category: suggestion.category,
       address: suggestion.address,
+      category: suggestion.category,
       features: suggestion.features,
       latitude: suggestion.latitude,
       longitude: suggestion.longitude,
-      photoUrl: suggestion.photoUrl || "",
+      userId: suggestion.userId,
+      photoUrl: suggestion.photoUrl || null,
     },
   });
-  
-  // Set up mutation
-  const updateMutation = useMutation({
+
+  // Mutation for updating suggestion
+  const { mutate, isPending } = useMutation({
     mutationFn: (data: SuggestionFormValues) => {
-      return apiRequest("PUT", `/api/suggestions/${suggestion.id}/edit`, data);
+      return apiRequest(`/api/suggestions/${suggestion.id}/edit`, {
+        method: "PUT",
+        data,
+      });
     },
     onSuccess: () => {
-      // Reset form and close dialog
-      form.reset();
-      onClose();
-      
-      // Show success message
       toast({
-        title: "Suggestion Updated",
-        description: "The suggestion has been updated successfully.",
+        title: "Success",
+        description: "Suggestion updated successfully.",
       });
-      
-      // Refresh suggestion data
-      queryClient.invalidateQueries({ queryKey: ['/api/suggestions'] });
       onSuccess();
+      onClose();
     },
     onError: (error) => {
       console.error("Error updating suggestion:", error);
       toast({
-        title: "Update Failed",
-        description: "There was a problem updating the suggestion. Please try again.",
+        title: "Error",
+        description: "Failed to update suggestion. Please try again.",
         variant: "destructive",
       });
     },
   });
-  
-  // Form submission handler
+
   const onSubmit = (data: SuggestionFormValues) => {
-    updateMutation.mutate(data);
+    // Submit the form data
+    mutate(data);
   };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-md max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit Suggestion</DialogTitle>
-          <DialogDescription>
-            Make changes to the suggestion before approving or rejecting it.
-          </DialogDescription>
         </DialogHeader>
-        
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
@@ -129,7 +118,7 @@ export default function EditSuggestionDialog({
               name="name"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Location Name</FormLabel>
+                  <FormLabel>Name</FormLabel>
                   <FormControl>
                     <Input {...field} />
                   </FormControl>
@@ -137,33 +126,7 @@ export default function EditSuggestionDialog({
                 </FormItem>
               )}
             />
-            
-            <FormField
-              control={form.control}
-              name="category"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Category</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a category" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="cafe">Cafe</SelectItem>
-                      <SelectItem value="restaurant">Restaurant</SelectItem>
-                      <SelectItem value="park">Park</SelectItem>
-                      <SelectItem value="store">Store</SelectItem>
-                      <SelectItem value="hotel">Hotel</SelectItem>
-                      <SelectItem value="other">Other</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            
+
             <FormField
               control={form.control}
               name="description"
@@ -171,16 +134,13 @@ export default function EditSuggestionDialog({
                 <FormItem>
                   <FormLabel>Description</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      className="min-h-[100px]"
-                      {...field} 
-                    />
+                    <Textarea {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <FormField
               control={form.control}
               name="address"
@@ -194,25 +154,53 @@ export default function EditSuggestionDialog({
                 </FormItem>
               )}
             />
-            
+
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="restaurant">Restaurant</SelectItem>
+                      <SelectItem value="cafe">Cafe</SelectItem>
+                      <SelectItem value="park">Park</SelectItem>
+                      <SelectItem value="shop">Shop</SelectItem>
+                      <SelectItem value="pub">Pub</SelectItem>
+                      <SelectItem value="other">Other</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="features"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Dog-friendly Features</FormLabel>
+                  <FormLabel>Features</FormLabel>
                   <FormControl>
                     <Textarea 
-                      placeholder="e.g. Water bowls, treats, outdoor seating, dog menu..." 
-                      className="min-h-[80px]"
                       {...field} 
+                      placeholder="Water bowls, treats, outdoor seating, etc."
                     />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-            
+
             <div className="grid grid-cols-2 gap-4">
               <FormField
                 control={form.control}
@@ -222,17 +210,16 @@ export default function EditSuggestionDialog({
                     <FormLabel>Latitude</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        step="0.000001"
+                        {...field} 
+                        type="number"
+                        step="any"
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
-                        value={field.value === null ? '' : field.value}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              
               <FormField
                 control={form.control}
                 name="longitude"
@@ -241,10 +228,10 @@ export default function EditSuggestionDialog({
                     <FormLabel>Longitude</FormLabel>
                     <FormControl>
                       <Input 
-                        type="number" 
-                        step="0.000001"
+                        {...field} 
+                        type="number"
+                        step="any"
                         onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
-                        value={field.value === null ? '' : field.value}
                       />
                     </FormControl>
                     <FormMessage />
@@ -252,25 +239,31 @@ export default function EditSuggestionDialog({
                 )}
               />
             </div>
-            
-            {/* Photo preview */}
-            {photoPreview && (
+
+            {suggestion.photoUrl && (
               <div className="mt-2">
-                <FormLabel className="block mb-2">Photo Preview</FormLabel>
-                <img 
-                  src={photoPreview} 
-                  alt="Location preview" 
-                  className="w-full h-32 object-cover rounded-md"
-                />
+                <FormLabel>Current Photo</FormLabel>
+                <div className="mt-1">
+                  <img 
+                    src={suggestion.photoUrl} 
+                    alt={suggestion.name}
+                    className="w-full h-32 object-cover rounded-md"
+                  />
+                </div>
               </div>
             )}
-            
-            <DialogFooter className="mt-6">
-              <Button variant="outline" type="button" onClick={onClose}>
+
+            <DialogFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onClose}
+                disabled={isPending}
+              >
                 Cancel
               </Button>
-              <Button type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+              <Button type="submit" disabled={isPending}>
+                {isPending ? "Saving..." : "Save Changes"}
               </Button>
             </DialogFooter>
           </form>
