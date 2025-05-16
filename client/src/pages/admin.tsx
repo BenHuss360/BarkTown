@@ -1,0 +1,257 @@
+import { useState } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { useAuth } from "@/contexts/AuthContext";
+import { apiRequest, queryClient } from "@/lib/queryClient";
+import LocationHeader from "@/components/location-header";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Card } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+
+// Admin users - in a real app, this would come from a database with roles
+const ADMIN_IDS = [1, 2]; // Example admin user IDs
+
+export default function AdminPage() {
+  const { user } = useAuth();
+  const [_, navigate] = useLocation();
+  const { toast } = useToast();
+  const [activeTab, setActiveTab] = useState("pending");
+  
+  // Check if current user is admin
+  const isAdmin = user && ADMIN_IDS.includes(user.id);
+  
+  // Fetch all suggestions
+  const { data: suggestions = [], isLoading, refetch } = useQuery<any[]>({
+    queryKey: ["/api/suggestions"],
+    enabled: !!isAdmin,
+  });
+  
+  // Filter suggestions based on active tab
+  const filteredSuggestions = suggestions.filter(
+    (suggestion) => suggestion.status === activeTab
+  );
+  
+  // Set up mutation to update suggestion status
+  const updateStatusMutation = useMutation({
+    mutationFn: ({ id, status }: { id: number; status: string }) => {
+      return apiRequest("PUT", `/api/suggestions/${id}/status`, { status });
+    },
+    onSuccess: () => {
+      // Refetch suggestions to update the list
+      refetch();
+      toast({
+        title: "Status Updated",
+        description: "The suggestion status has been updated successfully.",
+      });
+    },
+    onError: (error) => {
+      console.error("Error updating status:", error);
+      toast({
+        title: "Update Failed",
+        description: "There was a problem updating the suggestion status.",
+        variant: "destructive",
+      });
+    },
+  });
+  
+  // Handle status update
+  const handleStatusUpdate = (id: number, status: string) => {
+    updateStatusMutation.mutate({ id, status });
+  };
+  
+  // If user is not admin, show access denied
+  if (!isAdmin) {
+    return (
+      <div className="flex flex-col h-full">
+        <LocationHeader title="Admin Panel" onAccessibilityClick={() => {}} />
+        <div className="flex-1 p-4 flex flex-col items-center justify-center">
+          <div className="text-center mb-6">
+            <h2 className="text-xl font-bold mb-2">Access Denied</h2>
+            <p className="text-gray-600 dark:text-gray-400 mb-4">
+              You don't have permission to access the admin panel.
+            </p>
+            <Button onClick={() => navigate("/")}>
+              Return to Home
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="flex flex-col h-full">
+      <LocationHeader title="Admin Panel" onAccessibilityClick={() => {}} />
+      
+      <div className="flex-1 px-4 py-4 overflow-y-auto">
+        <h2 className="text-xl font-bold mb-4">Manage Location Suggestions</h2>
+        
+        {/* Tabs for filtering suggestions */}
+        <Tabs defaultValue="pending" onValueChange={setActiveTab} className="mb-4">
+          <TabsList className="w-full grid grid-cols-3">
+            <TabsTrigger value="pending">
+              Pending
+              <Badge variant="outline" className="ml-2">
+                {suggestions.filter(s => s.status === "pending").length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="approved">
+              Approved
+              <Badge variant="outline" className="ml-2">
+                {suggestions.filter(s => s.status === "approved").length}
+              </Badge>
+            </TabsTrigger>
+            <TabsTrigger value="rejected">
+              Rejected
+              <Badge variant="outline" className="ml-2">
+                {suggestions.filter(s => s.status === "rejected").length}
+              </Badge>
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="pending" className="mt-4">
+            {filteredSuggestions.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No pending suggestions to review.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredSuggestions.map((suggestion) => (
+                  <SuggestionCard 
+                    key={suggestion.id}
+                    suggestion={suggestion}
+                    onStatusUpdate={handleStatusUpdate}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="approved" className="mt-4">
+            {filteredSuggestions.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No approved suggestions yet.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredSuggestions.map((suggestion) => (
+                  <SuggestionCard 
+                    key={suggestion.id}
+                    suggestion={suggestion}
+                    onStatusUpdate={handleStatusUpdate}
+                    showReject={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="rejected" className="mt-4">
+            {filteredSuggestions.length === 0 ? (
+              <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                No rejected suggestions.
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {filteredSuggestions.map((suggestion) => (
+                  <SuggestionCard 
+                    key={suggestion.id}
+                    suggestion={suggestion}
+                    onStatusUpdate={handleStatusUpdate}
+                    showApprove={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
+      </div>
+    </div>
+  );
+}
+
+// Suggestion card component
+interface SuggestionCardProps {
+  suggestion: any;
+  onStatusUpdate: (id: number, status: string) => void;
+  showApprove?: boolean;
+  showReject?: boolean;
+}
+
+function SuggestionCard({ 
+  suggestion, 
+  onStatusUpdate, 
+  showApprove = false, 
+  showReject = false 
+}: SuggestionCardProps) {
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString() + ' ' + date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+  
+  return (
+    <Card className="p-4">
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="text-lg font-medium">{suggestion.name}</h3>
+        <Badge className="capitalize">
+          {suggestion.category}
+        </Badge>
+      </div>
+      
+      <div className="mb-3 text-sm text-gray-600 dark:text-gray-400">
+        Submitted on {formatDate(suggestion.createdAt)} • User ID: {suggestion.userId}
+      </div>
+      
+      <div className="mb-3">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Description:</div>
+        <p className="text-sm">{suggestion.description}</p>
+      </div>
+      
+      <div className="mb-3">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Address:</div>
+        <p className="text-sm">{suggestion.address}</p>
+      </div>
+      
+      <div className="mb-3">
+        <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Features:</div>
+        <p className="text-sm">{suggestion.features}</p>
+      </div>
+      
+      {/* Show coordinates if available */}
+      {(suggestion.latitude !== null && suggestion.longitude !== null) && (
+        <div className="mb-3">
+          <div className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Location:</div>
+          <p className="text-sm">
+            {suggestion.latitude.toFixed(6)}, {suggestion.longitude.toFixed(6)}
+          </p>
+        </div>
+      )}
+      
+      {/* Action buttons */}
+      <div className="flex justify-end space-x-2 mt-2">
+        {(suggestion.status === "pending" || showApprove) && (
+          <Button 
+            size="sm" 
+            variant="default" 
+            onClick={() => onStatusUpdate(suggestion.id, "approved")}
+          >
+            Approve
+          </Button>
+        )}
+        
+        {(suggestion.status === "pending" || showReject) && (
+          <Button 
+            size="sm" 
+            variant="outline" 
+            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            onClick={() => onStatusUpdate(suggestion.id, "rejected")}
+          >
+            Reject
+          </Button>
+        )}
+      </div>
+    </Card>
+  );
+}
