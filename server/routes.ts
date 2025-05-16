@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertFavoriteSchema } from "@shared/schema";
+import { insertFavoriteSchema, insertReviewSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all locations
@@ -133,6 +133,132 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking favorite status:", error);
       return res.status(500).json({ message: "Failed to check favorite status" });
+    }
+  });
+
+  // Reviews Routes
+  // Get reviews for a location
+  app.get("/api/locations/:locationId/reviews", async (req: Request, res: Response) => {
+    try {
+      const locationId = parseInt(req.params.locationId);
+      
+      if (isNaN(locationId)) {
+        return res.status(400).json({ message: "Invalid location ID" });
+      }
+      
+      const reviews = await storage.getReviewsByLocationId(locationId);
+      return res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching reviews:", error);
+      return res.status(500).json({ message: "Failed to fetch reviews" });
+    }
+  });
+  
+  // Get reviews by a user
+  app.get("/api/users/:userId/reviews", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const reviews = await storage.getUserReviews(userId);
+      return res.json(reviews);
+    } catch (error) {
+      console.error("Error fetching user reviews:", error);
+      return res.status(500).json({ message: "Failed to fetch user reviews" });
+    }
+  });
+  
+  // Create a new review
+  app.post("/api/reviews", async (req: Request, res: Response) => {
+    try {
+      const validationResult = insertReviewSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid review data",
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const review = await storage.addReview(validationResult.data);
+      return res.status(201).json(review);
+    } catch (error) {
+      console.error("Error creating review:", error);
+      return res.status(500).json({ message: "Failed to create review" });
+    }
+  });
+  
+  // Update a review
+  app.put("/api/reviews/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid review ID" });
+      }
+      
+      const existingReview = await storage.getReview(id);
+      if (!existingReview) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      // Partial validation of the update data
+      const validationResult = insertReviewSchema.partial().safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid review data",
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const updatedReview = await storage.updateReview(id, validationResult.data);
+      return res.json(updatedReview);
+    } catch (error) {
+      console.error("Error updating review:", error);
+      return res.status(500).json({ message: "Failed to update review" });
+    }
+  });
+  
+  // Delete a review
+  app.delete("/api/reviews/:id", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid review ID" });
+      }
+      
+      const success = await storage.deleteReview(id);
+      if (!success) {
+        return res.status(404).json({ message: "Review not found" });
+      }
+      
+      return res.status(204).send();
+    } catch (error) {
+      console.error("Error deleting review:", error);
+      return res.status(500).json({ message: "Failed to delete review" });
+    }
+  });
+  
+  // Check if user has already reviewed a location
+  app.get("/api/users/:userId/locations/:locationId/review", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      const locationId = parseInt(req.params.locationId);
+      
+      if (isNaN(userId) || isNaN(locationId)) {
+        return res.status(400).json({ message: "Invalid user ID or location ID" });
+      }
+      
+      const review = await storage.getUserReviewForLocation(userId, locationId);
+      return res.json({ hasReview: !!review, review });
+    } catch (error) {
+      console.error("Error checking review status:", error);
+      return res.status(500).json({ message: "Failed to check review status" });
     }
   });
 

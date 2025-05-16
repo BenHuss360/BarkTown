@@ -48,9 +48,11 @@ export class MemStorage implements IStorage {
     this.users = new Map();
     this.locations = new Map();
     this.favorites = new Map();
+    this.reviews = new Map();
     this.userIdCounter = 1;
     this.locationIdCounter = 1;
     this.favoriteIdCounter = 1;
+    this.reviewIdCounter = 1;
     
     // Initialize with sample data
     this.initSampleData();
