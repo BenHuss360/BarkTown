@@ -40,8 +40,8 @@ export default function Settings() {
       }
     }
     
-    // Check if user is admin
-    setIsAdmin(user?.id === 1);
+    // Check if user is admin - using isAdmin flag from user object
+    setIsAdmin(user?.isAdmin || false);
   }, [user]);
   
   // Apply text size settings

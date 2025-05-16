@@ -9,6 +9,7 @@ interface User {
   displayName: string | null;
   email: string | null;
   photoURL: string | null;
+  isAdmin?: boolean;
 }
 
 interface AuthContextType {
@@ -28,11 +29,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Function to make a user an admin or revoke admin privileges
   const makeAdmin = (enabled: boolean) => {
     if (user) {
-      // Create a new user object with modified ID
-      // In a real app, this would call an API to update the user's role in the database
+      // Create a new user object with admin flag
       const updatedUser = {
         ...user,
-        id: enabled ? 1 : (user.id === 1 ? 2 : user.id) // Set to ID 1 for admin, or reset to another ID
+        isAdmin: enabled
       };
       
       setUser(updatedUser);
@@ -55,16 +55,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (firebaseUser) {
         // Generate a user ID based on the user's email or UID to ensure different users get different IDs
         // This is for demonstration purposes only - in a real app, this would come from the database
-        let userId = 1; // Default admin user for testing
+        let userId = 3; // Default user
+        let isAdmin = false;
         
-        // If this is a mock user and we're trying with a different email, assign a different ID
-        if (firebaseUser.email === "dog.lover@example.com") {
+        // Check if this is the specific admin email (ben@immersi.co.uk)
+        if (firebaseUser.email === "ben@immersi.co.uk") {
           userId = 1; // Admin user
-        } else if (firebaseUser.email?.includes("test")) {
+          isAdmin = true;
+        } else if (firebaseUser.email === "dog.lover@example.com") {
           userId = 2; // Test user
         } else if (firebaseUser.uid && firebaseUser.uid !== "user123") {
           // Generate a predictable but different ID based on the UID
-          userId = Math.abs(firebaseUser.uid.split("").reduce((a, b) => a + b.charCodeAt(0), 0) % 100) + 2;
+          userId = Math.abs(firebaseUser.uid.split("").reduce((a, b) => a + b.charCodeAt(0), 0) % 100) + 3;
         }
         
         const appUser: User = {
@@ -72,8 +74,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           uid: firebaseUser.uid,
           displayName: firebaseUser.displayName,
           email: firebaseUser.email,
-          photoURL: firebaseUser.photoURL
+          photoURL: firebaseUser.photoURL,
+          isAdmin: isAdmin
         };
+        
+        // Apply admin status if saved in localStorage
+        if (localStorage.getItem('poodlemaps_admin') === 'true' || isAdmin) {
+          // Only apply if it's the admin email
+          if (firebaseUser.email === "ben@immersi.co.uk") {
+            appUser.isAdmin = true;
+            localStorage.setItem('poodlemaps_admin', 'true');
+          }
+        }
         
         setUser(appUser);
         setIsLoading(false);
