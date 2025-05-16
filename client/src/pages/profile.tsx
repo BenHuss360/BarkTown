@@ -1,9 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
 import LocationHeader from "@/components/location-header";
+import { useAuth } from "@/contexts/AuthContext";
+import { FiLogIn, FiLogOut, FiUser } from "react-icons/fi";
+import { getCurrentUser } from "@/lib/firebase";
 
 // Settings that would be stored in local storage in a real app
 interface AccessibilitySettings {
@@ -16,6 +19,7 @@ interface AccessibilitySettings {
 
 export default function Profile() {
   const { toast } = useToast();
+  const { user, signIn, signOut, isLoading } = useAuth();
   const [settings, setSettings] = useState<AccessibilitySettings>({
     textSize: 2,
     highContrast: false,
@@ -23,6 +27,38 @@ export default function Profile() {
     reduceMotion: false,
     darkMode: "system"
   });
+  
+  const handleSignIn = async () => {
+    try {
+      await signIn();
+      toast({
+        title: "Signed In",
+        description: "Successfully signed in with Google",
+      });
+    } catch (error) {
+      toast({
+        title: "Sign In Failed",
+        description: "There was a problem signing in with Google",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Signed Out",
+        description: "You have been signed out",
+      });
+    } catch (error) {
+      toast({
+        title: "Sign Out Failed",
+        description: "There was a problem signing out",
+        variant: "destructive"
+      });
+    }
+  };
   
   const handleSaveSettings = () => {
     // In a real app, save to localStorage
@@ -39,17 +75,56 @@ export default function Profile() {
       <div className="flex-1 px-4 py-4 overflow-y-auto">
         <h2 className="text-xl font-bold mb-4">Your Profile</h2>
         
-        <div className="bg-card rounded-xl p-4 mb-4">
-          <div className="flex items-center space-x-4">
-            <div className="bg-primary rounded-full w-16 h-16 flex items-center justify-center text-white text-2xl font-bold">
-              D
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg">DogLover</h3>
-              <p className="text-muted-foreground">Dog owner since 2020</p>
+        {user ? (
+          <div className="bg-card rounded-xl p-4 mb-4">
+            <div className="flex items-center space-x-4">
+              {user.photoURL ? (
+                <img 
+                  src={user.photoURL} 
+                  alt={user.displayName || "User"} 
+                  className="rounded-full w-16 h-16 object-cover"
+                />
+              ) : (
+                <div className="bg-primary rounded-full w-16 h-16 flex items-center justify-center text-white text-2xl font-bold">
+                  {user.displayName ? user.displayName.charAt(0).toUpperCase() : <FiUser />}
+                </div>
+              )}
+              <div>
+                <h3 className="font-semibold text-lg">{user.displayName || "Dog Lover"}</h3>
+                <p className="text-muted-foreground">{user.email}</p>
+                <button 
+                  onClick={handleSignOut}
+                  className="flex items-center gap-2 mt-2 text-sm text-primary"
+                >
+                  <FiLogOut size={16} /> Sign out
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        ) : (
+          <div className="bg-card rounded-xl p-4 mb-4">
+            <div className="flex flex-col items-center text-center">
+              <div className="bg-muted rounded-full w-16 h-16 flex items-center justify-center text-muted-foreground text-2xl mb-3">
+                <FiUser size={28} />
+              </div>
+              <h3 className="font-semibold text-lg mb-1">Not Signed In</h3>
+              <p className="text-muted-foreground mb-4">Sign in to save your favorite places</p>
+              <button
+                onClick={handleSignIn}
+                className="ios-button bg-primary text-white flex items-center justify-center gap-2 w-full"
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
+                ) : (
+                  <>
+                    <FiLogIn size={18} /> Sign in with Google
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        )}
         
         <h3 className="font-semibold text-lg mt-6 mb-4">Accessibility Settings</h3>
         
