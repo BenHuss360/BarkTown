@@ -296,6 +296,21 @@ export class MemStorage implements IStorage {
   
   // Initialize sample data
   private initSampleData() {
+    // Add a sample suggestion for user 1
+    const sampleSuggestion: InsertLocationSuggestion = {
+      name: "Dog Park Cafe",
+      description: "A cafe with a dedicated dog play area",
+      category: "cafe",
+      address: "789 Bark Street, Downtown",
+      features: "Dog play area,Water bowls,Dog treats",
+      userId: 1,
+      latitude: 37.7852,
+      longitude: -122.4001
+    };
+    
+    // Create the suggestion
+    this.createSuggestion(sampleSuggestion);
+    
     // Sample reviews (to be added after sample locations)
     
     // Sample locations
