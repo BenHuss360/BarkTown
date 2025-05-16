@@ -93,12 +93,13 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
   }
   
   return (
-    <div className="map-container">
+    <div className="map-container relative">
       <MapContainer 
         center={position as [number, number]} 
         zoom={13} 
         scrollWheelZoom={false}
         style={{ height: '100%', width: '100%' }}
+        zoomControl={false}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -125,26 +126,26 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
                 <p className="text-xs">{location.category}</p>
                 <div className="mt-2">
                   <Link href={`/location/${location.id}`}>
-                    <a className="block w-full bg-primary text-white py-1 px-2 rounded text-sm font-medium">
+                    <div className="block w-full bg-primary text-white py-1 px-2 rounded text-sm font-medium">
                       View Details
-                    </a>
+                    </div>
                   </Link>
                 </div>
               </div>
             </Popup>
           </Marker>
         ))}
-        
-        {/* Map controls */}
-        <div className="absolute bottom-4 right-4 z-[1000]">
-          <ZoomControls />
-        </div>
-        
-        {/* Current location button */}
-        <div className="absolute bottom-4 left-4 z-[1000]">
-          <LocationButton />
-        </div>
       </MapContainer>
+      
+      {/* Map controls - positioned outside of MapContainer to avoid z-index issues */}
+      <div className="absolute bottom-4 right-4 z-50">
+        <ZoomControls />
+      </div>
+      
+      {/* Current location button - positioned outside of MapContainer to avoid z-index issues */}
+      <div className="absolute bottom-4 left-4 z-50">
+        <LocationButton />
+      </div>
     </div>
   );
 }
