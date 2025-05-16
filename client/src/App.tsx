@@ -13,13 +13,14 @@ import SuggestLocation from "@/pages/suggest";
 import Settings from "@/pages/settings";
 import Admin from "@/pages/admin";
 import AccessibilityPanel from "@/components/accessibility-panel";
-import StatusBar from "@/components/status-bar";
 import AppNavigation from "@/components/app-navigation";
+import SplashScreen from "@/components/splash-screen";
 import { AuthProvider } from "./contexts/AuthContext";
 import { LocationProvider } from "./contexts/LocationContext";
 
 function App() {
   const [showAccessibility, setShowAccessibility] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
   
   // Add event listener for keyboard (for accessibility)
   useEffect(() => {
@@ -41,22 +42,26 @@ function App() {
       <LocationProvider>
         <TooltipProvider>
           <div className="flex flex-col h-full w-full">
-            <StatusBar />
-            
-            <main className="flex-1 flex flex-col h-full overflow-hidden">
-              <Switch>
-                <Route path="/" component={Home} />
-                <Route path="/saved" component={Saved} />
-                <Route path="/profile" component={Profile} />
-                <Route path="/location/:id" component={Detail} />
-                <Route path="/suggest" component={SuggestLocation} />
-                <Route path="/settings" component={Settings} />
-                <Route path="/admin" component={Admin} />
-                <Route component={NotFound} />
-              </Switch>
-            </main>
-            
-            <AppNavigation />
+            {showSplash ? (
+              <SplashScreen onFinish={() => setShowSplash(false)} />
+            ) : (
+              <>
+                <main className="flex-1 flex flex-col h-full overflow-hidden">
+                  <Switch>
+                    <Route path="/" component={Home} />
+                    <Route path="/saved" component={Saved} />
+                    <Route path="/profile" component={Profile} />
+                    <Route path="/location/:id" component={Detail} />
+                    <Route path="/suggest" component={SuggestLocation} />
+                    <Route path="/settings" component={Settings} />
+                    <Route path="/admin" component={Admin} />
+                    <Route component={NotFound} />
+                  </Switch>
+                </main>
+                
+                <AppNavigation />
+              </>
+            )}
             
             <Toaster />
             
