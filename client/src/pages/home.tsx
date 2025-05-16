@@ -100,11 +100,12 @@ export default function Home() {
   
   return (
     <div className="flex flex-col h-full">
-      <LocationHeader onAccessibilityClick={() => {}} />
+      <LocationHeader 
+        onAccessibilityClick={() => {}} 
+        onSearch={handleSearch}
+      />
       
       <div className="px-4 py-2 bg-background sticky top-0 z-50">
-        <SearchBar onSearch={handleSearch} />
-      
         <div className="pt-2 pb-2 overflow-x-auto">
           <CategoryFilters 
             selectedCategory={selectedCategory} 
