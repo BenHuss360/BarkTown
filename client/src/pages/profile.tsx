@@ -13,16 +13,16 @@ export default function Profile() {
   const { user, signIn, signOut, isLoading } = useAuth();
   const [_, navigate] = useLocation();
   
-  // Fetch user's paw points if logged in
+  // Fetch user's paw points if logged in - ensure we're using the actual user ID
   const { data: pointsData = { pawPoints: 0 } } = useQuery<{ pawPoints: number }>({
-    queryKey: [`/api/users/${user?.id || 1}/points`],
-    enabled: !!user,
+    queryKey: [`/api/users/${user?.id}/points`],
+    enabled: !!user && !!user.id, // Only run query if user exists and has an ID
   });
   
-  // Fetch user's current suggestions if logged in
+  // Fetch user's current suggestions if logged in - ensure we're using the actual user ID
   const { data: suggestionsData = [] } = useQuery<any[]>({
-    queryKey: [`/api/users/${user?.id || 1}/suggestions`],
-    enabled: !!user,
+    queryKey: [`/api/users/${user?.id}/suggestions`],
+    enabled: !!user && !!user.id, // Only run query if user exists and has an ID
   });
   
   const pawPoints = pointsData.pawPoints;
