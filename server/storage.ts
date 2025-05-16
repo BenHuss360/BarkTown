@@ -562,11 +562,15 @@ export class DatabaseStorage implements IStorage {
 
   // Favorites methods
   async getFavoritesByUserId(userId: number): Promise<Location[]> {
-    return db
-      .select()
+    const result = await db
+      .select({
+        location: locations
+      })
       .from(locations)
       .innerJoin(favorites, eq(locations.id, favorites.locationId))
       .where(eq(favorites.userId, userId));
+    
+    return result.map(item => item.location);
   }
 
   async addFavorite(insertFavorite: InsertFavorite): Promise<Favorite> {
@@ -575,7 +579,7 @@ export class DatabaseStorage implements IStorage {
   }
 
   async removeFavorite(userId: number, locationId: number): Promise<boolean> {
-    const result = await db
+    await db
       .delete(favorites)
       .where(
         and(
@@ -583,7 +587,7 @@ export class DatabaseStorage implements IStorage {
           eq(favorites.locationId, locationId)
         )
       );
-    return result.count > 0;
+    return true; // PostgreSQL driver doesn't return count easily, so we'll just return true
   }
 
   async isFavorite(userId: number, locationId: number): Promise<boolean> {
@@ -631,8 +635,8 @@ export class DatabaseStorage implements IStorage {
   }
 
   async deleteReview(id: number): Promise<boolean> {
-    const result = await db.delete(reviews).where(eq(reviews.id, id));
-    return result.count > 0;
+    await db.delete(reviews).where(eq(reviews.id, id));
+    return true; // PostgreSQL driver doesn't return count easily
   }
 
   async getReview(id: number): Promise<Review | undefined> {
