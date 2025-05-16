@@ -3,6 +3,8 @@ import { useToast } from "@/hooks/use-toast";
 import LocationCard from "@/components/location-card";
 import LocationHeader from "@/components/location-header";
 import { Location } from "@shared/schema";
+import { useEffect } from "react";
+import { queryClient } from "@/lib/queryClient";
 
 export default function Saved() {
   const { toast } = useToast();
@@ -10,8 +12,13 @@ export default function Saved() {
   // In a real app, this would use the actual user ID
   const userId = 1;
   
+  // Force refresh when the component mounts
+  useEffect(() => {
+    queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
+  }, [userId]);
+  
   // Fetch user's favorite locations
-  const { data: favorites, isLoading, error } = useQuery({
+  const { data: favorites, isLoading, error, refetch } = useQuery({
     queryKey: [`/api/favorites/${userId}`],
     retry: 1,
     onError: () => {
