@@ -98,7 +98,7 @@ export class MemStorage implements IStorage {
 
   async createUser(insertUser: InsertUser): Promise<User> {
     const id = this.userIdCounter++;
-    const user: User = { ...insertUser, id };
+    const user: User = { ...insertUser, id, pawPoints: 0 };
     this.users.set(id, user);
     return user;
   }
@@ -222,6 +222,76 @@ export class MemStorage implements IStorage {
     return Array.from(this.reviews.values()).find(
       (review) => review.userId === userId && review.locationId === locationId
     );
+  }
+  
+  // Location suggestion methods
+  async getSuggestions(): Promise<LocationSuggestion[]> {
+    return Array.from(this.suggestions.values());
+  }
+  
+  async getSuggestionsByUser(userId: number): Promise<LocationSuggestion[]> {
+    return Array.from(this.suggestions.values()).filter(
+      (suggestion) => suggestion.userId === userId
+    );
+  }
+  
+  async getSuggestionById(id: number): Promise<LocationSuggestion | undefined> {
+    return this.suggestions.get(id);
+  }
+  
+  async createSuggestion(insertSuggestion: InsertLocationSuggestion): Promise<LocationSuggestion> {
+    const id = this.suggestionIdCounter++;
+    const createdAt = new Date();
+    const status = "pending";
+    
+    // Ensure latitude and longitude are null if not provided
+    const latitude = insertSuggestion.latitude !== undefined ? insertSuggestion.latitude : null;
+    const longitude = insertSuggestion.longitude !== undefined ? insertSuggestion.longitude : null;
+    
+    const suggestion: LocationSuggestion = { 
+      ...insertSuggestion,
+      latitude,
+      longitude, 
+      id, 
+      status, 
+      createdAt 
+    };
+    
+    this.suggestions.set(id, suggestion);
+    return suggestion;
+  }
+  
+  async updateSuggestionStatus(id: number, status: string): Promise<LocationSuggestion | undefined> {
+    const suggestion = this.suggestions.get(id);
+    if (!suggestion) {
+      return undefined;
+    }
+    
+    // If approving the suggestion, add it as a new location
+    if (status === "approved") {
+      // Add the suggested location to actual locations
+      this.createLocation({
+        name: suggestion.name,
+        description: suggestion.description,
+        category: suggestion.category,
+        address: suggestion.address,
+        latitude: suggestion.latitude || 0,
+        longitude: suggestion.longitude || 0,
+        features: suggestion.features,
+        rating: 0,
+        reviewCount: 0,
+        imageUrl: `https://source.unsplash.com/random/800x600/?${suggestion.category}`,
+        distanceMiles: 0
+      });
+      
+      // Give the user paw points (5 for approved suggestion)
+      this.updateUserPoints(suggestion.userId, 5);
+    }
+    
+    // Update the suggestion status
+    const updatedSuggestion = { ...suggestion, status };
+    this.suggestions.set(id, updatedSuggestion);
+    return updatedSuggestion;
   }
   
   // Initialize sample data

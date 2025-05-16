@@ -9,6 +9,7 @@ import Home from "@/pages/home";
 import Saved from "@/pages/saved";
 import Profile from "@/pages/profile";
 import Detail from "@/pages/detail";
+import SuggestLocation from "@/pages/suggest";
 import AccessibilityPanel from "@/components/accessibility-panel";
 import StatusBar from "@/components/status-bar";
 import AppNavigation from "@/components/app-navigation";
@@ -46,6 +47,8 @@ function App() {
                 <Route path="/saved" component={Saved} />
                 <Route path="/profile" component={Profile} />
                 <Route path="/location/:id" component={Detail} />
+                <Route path="/suggest" component={SuggestLocation} />
+                <Route path="/admin" component={NotFound} />
                 <Route component={NotFound} />
               </Switch>
             </main>

@@ -2,7 +2,7 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { z } from "zod";
-import { insertFavoriteSchema, insertReviewSchema } from "@shared/schema";
+import { insertFavoriteSchema, insertReviewSchema, insertLocationSuggestionSchema } from "@shared/schema";
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Get all locations
@@ -259,6 +259,105 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error checking review status:", error);
       return res.status(500).json({ message: "Failed to check review status" });
+    }
+  });
+  
+  // Location Suggestion Routes
+  
+  // Get all location suggestions (for admin)
+  app.get("/api/suggestions", async (_req: Request, res: Response) => {
+    try {
+      const suggestions = await storage.getSuggestions();
+      return res.json(suggestions);
+    } catch (error) {
+      console.error("Error fetching suggestions:", error);
+      return res.status(500).json({ message: "Failed to fetch location suggestions" });
+    }
+  });
+  
+  // Get suggestions by a specific user
+  app.get("/api/users/:userId/suggestions", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const suggestions = await storage.getSuggestionsByUser(userId);
+      return res.json(suggestions);
+    } catch (error) {
+      console.error("Error fetching user suggestions:", error);
+      return res.status(500).json({ message: "Failed to fetch user's location suggestions" });
+    }
+  });
+  
+  // Submit a new location suggestion
+  app.post("/api/locations/suggest", async (req: Request, res: Response) => {
+    try {
+      const validationResult = insertLocationSuggestionSchema.safeParse(req.body);
+      
+      if (!validationResult.success) {
+        return res.status(400).json({ 
+          message: "Invalid location suggestion data", 
+          errors: validationResult.error.errors 
+        });
+      }
+      
+      const suggestion = await storage.createSuggestion(validationResult.data);
+      return res.status(201).json(suggestion);
+    } catch (error) {
+      console.error("Error creating suggestion:", error);
+      return res.status(500).json({ message: "Failed to submit location suggestion" });
+    }
+  });
+  
+  // Update suggestion status (admin only)
+  app.put("/api/suggestions/:id/status", async (req: Request, res: Response) => {
+    try {
+      const id = parseInt(req.params.id);
+      const { status } = req.body;
+      
+      if (isNaN(id)) {
+        return res.status(400).json({ message: "Invalid suggestion ID" });
+      }
+      
+      if (!status || !["pending", "approved", "rejected"].includes(status)) {
+        return res.status(400).json({ message: "Invalid status value" });
+      }
+      
+      const updatedSuggestion = await storage.updateSuggestionStatus(id, status);
+      
+      if (!updatedSuggestion) {
+        return res.status(404).json({ message: "Suggestion not found" });
+      }
+      
+      return res.json(updatedSuggestion);
+    } catch (error) {
+      console.error("Error updating suggestion status:", error);
+      return res.status(500).json({ message: "Failed to update suggestion status" });
+    }
+  });
+  
+  // Get user paw points
+  app.get("/api/users/:userId/points", async (req: Request, res: Response) => {
+    try {
+      const userId = parseInt(req.params.userId);
+      
+      if (isNaN(userId)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+      }
+      
+      const user = await storage.getUser(userId);
+      
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+      
+      return res.json({ userId, pawPoints: user.pawPoints || 0 });
+    } catch (error) {
+      console.error("Error fetching user points:", error);
+      return res.status(500).json({ message: "Failed to fetch user paw points" });
     }
   });
 
