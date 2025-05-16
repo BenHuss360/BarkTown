@@ -12,8 +12,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { ShieldCheck, Edit } from "lucide-react";
 
-// Admin users - in a real app, this would come from a database with roles
-const ADMIN_IDS = [1, 2]; // Example admin user IDs
+// Only user ID 1 has admin access
+const ADMIN_ID = 1;
 
 export default function AdminPage() {
   const { user } = useAuth();
@@ -21,8 +21,8 @@ export default function AdminPage() {
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState("pending");
   
-  // Check if current user is admin
-  const isAdmin = user && ADMIN_IDS.includes(user.id);
+  // Check if current user is admin - must be exactly user ID 1
+  const isAdmin = user && user.id === ADMIN_ID;
   
   // Fetch all suggestions
   const { data: suggestions = [], isLoading, refetch } = useQuery<any[]>({
