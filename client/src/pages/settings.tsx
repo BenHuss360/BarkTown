@@ -121,36 +121,7 @@ export default function Settings() {
           </div>
           <h2 className="text-xl font-bold">Settings</h2>
         </div>
-        
-        {/* Admin Controls Section - only visible when logged in */}
-        {user && (
-          <>
-            <div className="flex items-center gap-3 mb-4">
-              <div className="bg-amber-100 dark:bg-amber-900/30 p-2 rounded-full">
-                <Shield className="h-5 w-5 text-amber-600 dark:text-amber-400" />
-              </div>
-              <h3 className="text-lg font-semibold">Admin Controls</h3>
-            </div>
-            
-            <div className="bg-card rounded-xl p-4 mb-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <Label htmlFor="adminMode" className="font-medium block">Admin Mode</Label>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Toggle admin privileges to access the admin panel
-                  </p>
-                </div>
-                <Switch 
-                  id="adminMode"
-                  checked={isAdmin}
-                  onCheckedChange={toggleAdminStatus}
-                />
-              </div>
-            </div>
-            
-            <Separator className="my-6" />
-          </>
-        )}
+
         
         {/* Accessibility Settings Section */}
         <div className="flex items-center gap-3 mb-4">
