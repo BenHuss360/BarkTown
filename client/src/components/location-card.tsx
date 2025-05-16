@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { Star, MapPin } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Location } from "@shared/schema";
 
 interface LocationCardProps {
@@ -49,6 +49,11 @@ export default function LocationCard({ location, isSaved = false }: LocationCard
           description: "This location has been added to your saved places."
         });
       }
+      
+      // Invalidate all relevant queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}`] });
+      queryClient.invalidateQueries({ queryKey: [`/api/favorites/${userId}/${id}`] });
+      
     } catch (error) {
       toast({
         variant: "destructive",

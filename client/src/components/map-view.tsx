@@ -3,18 +3,42 @@ import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import { Link } from "wouter";
 import { Location } from "@shared/schema";
 import { Button } from "@/components/ui/button";
-import { MapPin, Plus, Minus, Locate } from "lucide-react";
+import { MapPin, Plus, Minus, Locate, Coffee, UtensilsCrossed, Trees, ShoppingBag } from "lucide-react";
 import L from 'leaflet';
 
 // Import leaflet CSS directly
 import 'leaflet/dist/leaflet.css';
 
-// Define custom marker icon
-const markerIcon = L.divIcon({
-  className: "custom-marker",
-  html: `<div style="background-color: #007AFF; width: 20px; height: 20px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg></div>`,
-  iconSize: [20, 20]
-});
+// Function to create category-specific marker icons
+const createMarkerIcon = (category: string) => {
+  let bgColor = "#007AFF"; // Default blue for unknown categories
+  let icon = `<path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle>`;
+  
+  switch(category) {
+    case "restaurant":
+      bgColor = "#FF9500"; // Orange
+      icon = `<path d="M16 2H8v2h8zM3 6h18v2H3z"></path><path d="M4 10v10h4V10zM16 10v10h4V10zM8 10v10h8V10z"></path>`;
+      break;
+    case "cafe":
+      bgColor = "#AF52DE"; // Purple
+      icon = `<path d="M18 5H4a2 2 0 00-2 2v8a4 4 0 004 4h8a4 4 0 004-4V7a2 2 0 00-2-2z"></path><line x1="4" y1="5" x2="4" y2="2"></line><line x1="12" y1="5" x2="12" y2="2"></line><line x1="20" y1="5" x2="20" y2="2"></line>`;
+      break;
+    case "park":
+      bgColor = "#34C759"; // Green
+      icon = `<path d="M8 9l4-4 4 4"></path><path d="M12 5v14"></path><path d="M4 14h16"></path><path d="M4 17h16"></path>`;
+      break;
+    case "shop":
+      bgColor = "#5856D6"; // Indigo
+      icon = `<path d="M20 10a4 4 0 01-4 4H8a4 4 0 01-4-4"></path><path d="M20 10v10H4V10"></path><path d="M18 10V7a6 6 0 00-12 0v3"></path>`;
+      break;
+  }
+  
+  return L.divIcon({
+    className: "custom-marker",
+    html: `<div style="background-color: ${bgColor}; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.3);"><svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${icon}</svg></div>`,
+    iconSize: [24, 24]
+  });
+};
 
 interface MapViewProps {
   locations: Location[];
@@ -122,12 +146,12 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
           <Marker 
             key={location.id}
             position={[location.latitude, location.longitude] as [number, number]}
-            icon={markerIcon}
+            icon={createMarkerIcon(location.category)}
           >
             <Popup>
               <div className="text-center">
                 <h3 className="font-semibold">{location.name}</h3>
-                <p className="text-xs">{location.category}</p>
+                <p className="text-xs capitalize">{location.category}</p>
                 <div className="mt-2">
                   <Link href={`/location/${location.id}`}>
                     <div className="block w-full bg-primary text-white py-1 px-2 rounded text-sm font-medium">
