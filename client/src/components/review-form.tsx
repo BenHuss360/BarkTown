@@ -7,6 +7,7 @@ import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
 import { insertReviewSchema } from "@shared/schema";
+import PawRating from "./paw-rating";
 
 // TypeScript type guard to check if user exists and has an id
 const userHasId = (user: any): user is { id: number } => {
@@ -130,24 +131,16 @@ export default function ReviewForm({ locationId, onSuccess, existingReview }: Re
       </h3>
       
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Star Rating */}
+        {/* Paw Print Rating */}
         <div className="space-y-2">
           <label className="block text-sm font-medium">Rating</label>
-          <div className="flex space-x-1">
-            {[1, 2, 3, 4, 5].map((star) => (
-              <button
-                key={star}
-                type="button"
-                onClick={() => setValue("rating", star)}
-                className="text-2xl focus:outline-none"
-              >
-                {star <= currentRating ? (
-                  <span className="text-yellow-500">★</span>
-                ) : (
-                  <span className="text-gray-300">★</span>
-                )}
-              </button>
-            ))}
+          <div className="py-2">
+            <PawRating 
+              rating={currentRating} 
+              size="lg"
+              interactive={true}
+              onChange={(value) => setValue("rating", value)}
+            />
           </div>
           {errors.rating && (
             <p className="text-sm text-red-500">{errors.rating.message}</p>

@@ -29,11 +29,11 @@ export default function CategoryFilters({
             key={category.id}
             onClick={() => onSelectCategory(category.id)}
             className={`
-              flex-shrink-0 rounded-full px-4 py-2.5 flex items-center gap-2 
-              transition-all duration-200 shadow-sm
+              flex-shrink-0 dog-tag px-4 py-2 flex items-center gap-2 
+              transition-all duration-200
               ${isSelected 
-                ? "bg-primary text-primary-foreground font-medium shadow-md scale-105" 
-                : "bg-card text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                ? "dog-tag-selected" 
+                : "dog-tag-normal"
               }
               cursor-pointer
             `}

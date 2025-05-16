@@ -12,7 +12,7 @@ export default function LocationHeader({
   onAccessibilityClick
 }: LocationHeaderProps) {
   return (
-    <header className="px-4 py-3 flex items-center justify-between bg-background shadow-sm z-10">
+    <header className="px-4 py-3 flex items-center justify-between shadow-sm z-10 poodle-header">
       {/* Location selector or Title */}
       <div className="flex items-center">
         {title === "PawPlaces" ? (

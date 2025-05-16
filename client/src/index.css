@@ -192,6 +192,68 @@
     @apply h-6;
   }
   
+  /* Poodle-themed header with fur texture */
+  .poodle-header {
+    background-color: hsla(var(--primary) / 0.06);
+    background-image: url('/poodle-fur-pattern.svg');
+    background-size: 140px;
+    position: relative;
+  }
+  
+  .poodle-header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: linear-gradient(90deg, 
+      hsla(var(--primary) / 0.2),
+      hsla(var(--primary) / 0.5),
+      hsla(var(--primary) / 0.2)
+    );
+  }
+  
+  /* Dog tag styles for category filters */
+  .dog-tag {
+    position: relative;
+    border-radius: 12px;
+    overflow: visible;
+  }
+  
+  .dog-tag::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: hsla(var(--primary) / 0.8);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dog-tag-normal {
+    background-color: hsla(var(--background));
+    border: 1px solid hsla(var(--border));
+    color: hsla(var(--foreground));
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .dog-tag-normal:hover {
+    background-color: hsla(var(--secondary) / 0.15);
+    border-color: hsla(var(--secondary) / 0.3);
+  }
+  
+  .dog-tag-selected {
+    background-color: hsla(var(--primary));
+    color: hsla(var(--primary-foreground));
+    border: 1px solid hsla(var(--primary));
+    box-shadow: 0 2px 6px hsla(var(--primary) / 0.4);
+    transform: translateY(-2px);
+  }
+  
   /* Map container */
   .map-container {
     @apply h-80 w-full;
