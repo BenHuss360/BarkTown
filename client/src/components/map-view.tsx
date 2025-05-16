@@ -93,13 +93,14 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
   }
   
   return (
-    <div className="map-container relative">
+    <div className="map-container relative" style={{ height: "300px" }}>
       <MapContainer 
         center={position as [number, number]} 
         zoom={13} 
         scrollWheelZoom={false}
         style={{ height: '100%', width: '100%' }}
         zoomControl={false}
+        attributionControl={false}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'

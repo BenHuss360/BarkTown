@@ -60,12 +60,12 @@ export default function Home() {
       </div>
       
       {viewMode === "map" ? (
-        <div className="relative">
+        <div className="relative flex-1 overflow-hidden" style={{ marginBottom: "60px" }}>
           <MapView 
             locations={filteredLocations || []} 
             isLoading={isLoading} 
           />
-          <div className="absolute top-4 right-4">
+          <div className="absolute top-4 right-4 z-[9999]">
             <button 
               onClick={toggleViewMode}
               aria-label="Switch to list view"
