@@ -11,7 +11,7 @@ import { Location } from "@shared/schema";
 export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [viewMode, setViewMode] = useState<"map" | "list">("map");
+  const [viewMode, setViewMode] = useState<"map" | "list">("list");
   const [displayCount, setDisplayCount] = useState<number>(8); // Initial display count
   
   // Reference for infinite scroll detection

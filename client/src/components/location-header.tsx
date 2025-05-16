@@ -1,16 +1,19 @@
 import { MapPin, ChevronDown, Settings } from "lucide-react";
 import { Link } from "wouter";
+import SearchBar from "@/components/search-bar";
 
 interface LocationHeaderProps {
   title?: string;
   location?: string;
   onAccessibilityClick?: () => void;
+  onSearch?: (query: string) => void;
 }
 
 export default function LocationHeader({ 
   title = "Poodle Maps", 
   location = "Nearby",
-  onAccessibilityClick
+  onAccessibilityClick,
+  onSearch
 }: LocationHeaderProps) {
   return (
     <header className="px-4 py-3 flex items-center justify-between shadow-sm z-10 poodle-header">
@@ -26,8 +29,15 @@ export default function LocationHeader({
         )}
       </div>
       
-      {/* Settings Link */}
-      <div className="flex">
+      {/* Search and Settings */}
+      <div className="flex items-center gap-2">
+        {/* Only show search if onSearch is provided */}
+        {onSearch && (
+          <div className="flex items-center">
+            <SearchBar onSearch={onSearch} />
+          </div>
+        )}
+        
         <Link to="/settings">
           <button 
             aria-label="Settings" 
