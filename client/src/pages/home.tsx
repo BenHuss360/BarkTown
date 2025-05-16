@@ -132,7 +132,7 @@ export default function Home() {
         </div>
       ) : (
         <div className="relative flex-1" style={{ height: "calc(100vh - 205px)" }}>
-          <div className="sticky top-0 pt-2 pr-4 z-40 flex justify-end bg-background">
+          <div className="sticky top-0 z-40 flex justify-end bg-background px-4 py-2">
             <button 
               onClick={toggleViewMode}
               aria-label="Switch to map view"

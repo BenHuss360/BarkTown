@@ -12,11 +12,11 @@ export default function CategoryFilters({
   onSelectCategory 
 }: CategoryFiltersProps) {
   const categories = [
-    { id: "all", label: "All", icon: <FiCompass size={18} /> },
     { id: "park", label: "Parks", icon: <MdOutlinePark size={18} /> },
     { id: "cafe", label: "Cafés", icon: <FiCoffee size={18} /> },
     { id: "restaurant", label: "Restaurants", icon: <MdOutlineRestaurant size={18} /> },
-    { id: "shop", label: "Shops", icon: <FiShoppingBag size={18} /> }
+    { id: "shop", label: "Shops", icon: <FiShoppingBag size={18} /> },
+    { id: "all", label: "All", icon: <FiCompass size={18} /> }
   ];
   
   return (
