@@ -212,7 +212,11 @@ export default function EditSuggestionDialog({
                         {...field} 
                         type="number"
                         step="any"
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
+                        value={field.value?.toString() || ""}
+                        onChange={(e) => {
+                          const value = e.target.value === "" ? undefined : parseFloat(e.target.value);
+                          field.onChange(value);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
@@ -230,7 +234,11 @@ export default function EditSuggestionDialog({
                         {...field} 
                         type="number"
                         step="any"
-                        onChange={(e) => field.onChange(parseFloat(e.target.value) || null)}
+                        value={field.value?.toString() || ""}
+                        onChange={(e) => {
+                          const value = e.target.value === "" ? undefined : parseFloat(e.target.value);
+                          field.onChange(value);
+                        }}
                       />
                     </FormControl>
                     <FormMessage />
