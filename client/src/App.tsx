@@ -12,6 +12,7 @@ import Detail from "@/pages/detail";
 import AccessibilityPanel from "@/components/accessibility-panel";
 import StatusBar from "@/components/status-bar";
 import AppNavigation from "@/components/app-navigation";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   const [showAccessibility, setShowAccessibility] = useState(false);
@@ -32,7 +33,7 @@ function App() {
   }, []);
   
   return (
-    <QueryClientProvider client={queryClient}>
+    <AuthProvider>
       <TooltipProvider>
         <div className="flex flex-col h-full w-full">
           <StatusBar />
@@ -57,7 +58,7 @@ function App() {
           />
         </div>
       </TooltipProvider>
-    </QueryClientProvider>
+    </AuthProvider>
   );
 }
 
