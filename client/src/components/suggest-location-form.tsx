@@ -236,8 +236,7 @@ export default function SuggestLocationForm() {
                   <SelectItem value="cafe">Cafe</SelectItem>
                   <SelectItem value="restaurant">Restaurant</SelectItem>
                   <SelectItem value="park">Park</SelectItem>
-                  <SelectItem value="store">Store</SelectItem>
-                  <SelectItem value="hotel">Hotel</SelectItem>
+                  <SelectItem value="shop">Shop</SelectItem>
                   <SelectItem value="other">Other</SelectItem>
                 </SelectContent>
               </Select>
