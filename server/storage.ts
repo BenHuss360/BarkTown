@@ -495,4 +495,235 @@ export class MemStorage implements IStorage {
   }
 }
 
-export const storage = new MemStorage();
+// Database-backed storage implementation
+export class DatabaseStorage implements IStorage {
+  // User methods
+  async getUser(id: number): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.id, id));
+    return user;
+  }
+
+  async getUserByUsername(username: string): Promise<User | undefined> {
+    const [user] = await db.select().from(users).where(eq(users.username, username));
+    return user;
+  }
+
+  async createUser(insertUser: InsertUser): Promise<User> {
+    const [user] = await db.insert(users).values(insertUser).returning();
+    return user;
+  }
+
+  async updateUserPoints(userId: number, points: number): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    if (!user) return undefined;
+    
+    const currentPoints = user.pawPoints || 0;
+    const [updatedUser] = await db
+      .update(users)
+      .set({ pawPoints: currentPoints + points })
+      .where(eq(users.id, userId))
+      .returning();
+    
+    return updatedUser;
+  }
+
+  // Location methods
+  async getLocations(): Promise<Location[]> {
+    return db.select().from(locations);
+  }
+
+  async getLocationsByCategory(category: string): Promise<Location[]> {
+    return db.select().from(locations).where(eq(locations.category, category));
+  }
+
+  async getLocationById(id: number): Promise<Location | undefined> {
+    const [location] = await db.select().from(locations).where(eq(locations.id, id));
+    return location;
+  }
+
+  async searchLocations(query: string): Promise<Location[]> {
+    const lowerQuery = query.toLowerCase();
+    // Use SQL LIKE for text search
+    return db.select().from(locations).where(
+      or(
+        sql`lower(${locations.name}) like ${`%${lowerQuery}%`}`,
+        sql`lower(${locations.description}) like ${`%${lowerQuery}%`}`,
+        sql`lower(${locations.category}) like ${`%${lowerQuery}%`}`,
+        sql`lower(${locations.address}) like ${`%${lowerQuery}%`}`,
+        sql`lower(${locations.features}) like ${`%${lowerQuery}%`}`
+      )
+    );
+  }
+
+  async createLocation(insertLocation: InsertLocation): Promise<Location> {
+    const [location] = await db.insert(locations).values(insertLocation).returning();
+    return location;
+  }
+
+  // Favorites methods
+  async getFavoritesByUserId(userId: number): Promise<Location[]> {
+    return db
+      .select()
+      .from(locations)
+      .innerJoin(favorites, eq(locations.id, favorites.locationId))
+      .where(eq(favorites.userId, userId));
+  }
+
+  async addFavorite(insertFavorite: InsertFavorite): Promise<Favorite> {
+    const [favorite] = await db.insert(favorites).values(insertFavorite).returning();
+    return favorite;
+  }
+
+  async removeFavorite(userId: number, locationId: number): Promise<boolean> {
+    const result = await db
+      .delete(favorites)
+      .where(
+        and(
+          eq(favorites.userId, userId),
+          eq(favorites.locationId, locationId)
+        )
+      );
+    return result.count > 0;
+  }
+
+  async isFavorite(userId: number, locationId: number): Promise<boolean> {
+    const [favorite] = await db
+      .select()
+      .from(favorites)
+      .where(
+        and(
+          eq(favorites.userId, userId),
+          eq(favorites.locationId, locationId)
+        )
+      );
+    return !!favorite;
+  }
+
+  // Review methods
+  async getReviewsByLocationId(locationId: number): Promise<Review[]> {
+    return db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.locationId, locationId))
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async getUserReviews(userId: number): Promise<Review[]> {
+    return db
+      .select()
+      .from(reviews)
+      .where(eq(reviews.userId, userId))
+      .orderBy(desc(reviews.createdAt));
+  }
+
+  async addReview(insertReview: InsertReview): Promise<Review> {
+    const [review] = await db.insert(reviews).values(insertReview).returning();
+    return review;
+  }
+
+  async updateReview(id: number, reviewUpdate: Partial<InsertReview>): Promise<Review | undefined> {
+    const [review] = await db
+      .update(reviews)
+      .set(reviewUpdate)
+      .where(eq(reviews.id, id))
+      .returning();
+    return review;
+  }
+
+  async deleteReview(id: number): Promise<boolean> {
+    const result = await db.delete(reviews).where(eq(reviews.id, id));
+    return result.count > 0;
+  }
+
+  async getReview(id: number): Promise<Review | undefined> {
+    const [review] = await db.select().from(reviews).where(eq(reviews.id, id));
+    return review;
+  }
+
+  async getUserReviewForLocation(userId: number, locationId: number): Promise<Review | undefined> {
+    const [review] = await db
+      .select()
+      .from(reviews)
+      .where(
+        and(
+          eq(reviews.userId, userId),
+          eq(reviews.locationId, locationId)
+        )
+      );
+    return review;
+  }
+
+  // Location Suggestions methods
+  async getSuggestions(): Promise<LocationSuggestion[]> {
+    return db.select().from(locationSuggestions).orderBy(desc(locationSuggestions.createdAt));
+  }
+
+  async getSuggestionsByUser(userId: number): Promise<LocationSuggestion[]> {
+    return db
+      .select()
+      .from(locationSuggestions)
+      .where(eq(locationSuggestions.userId, userId))
+      .orderBy(desc(locationSuggestions.createdAt));
+  }
+
+  async getSuggestionById(id: number): Promise<LocationSuggestion | undefined> {
+    const [suggestion] = await db
+      .select()
+      .from(locationSuggestions)
+      .where(eq(locationSuggestions.id, id));
+    return suggestion;
+  }
+
+  async createSuggestion(insertSuggestion: InsertLocationSuggestion): Promise<LocationSuggestion> {
+    const [suggestion] = await db
+      .insert(locationSuggestions)
+      .values(insertSuggestion)
+      .returning();
+    return suggestion;
+  }
+
+  async updateSuggestionStatus(id: number, status: string): Promise<LocationSuggestion | undefined> {
+    // First get the suggestion
+    const suggestion = await this.getSuggestionById(id);
+    if (!suggestion) return undefined;
+
+    // Update the suggestion status
+    const [updatedSuggestion] = await db
+      .update(locationSuggestions)
+      .set({ status })
+      .where(eq(locationSuggestions.id, id))
+      .returning();
+
+    // If we're approving the suggestion, add it to the locations table
+    if (status === "approved") {
+      // Create a proper location from the suggestion
+      await this.createLocation({
+        name: suggestion.name,
+        description: suggestion.description,
+        category: suggestion.category,
+        address: suggestion.address,
+        latitude: suggestion.latitude || 37.7749,
+        longitude: suggestion.longitude || -122.4194,
+        rating: 4.0, // Start with a good rating
+        reviewCount: 1, // Start with one review
+        imageUrl: suggestion.photoUrl || "https://images.unsplash.com/photo-1610041321420-a489049a5616?q=80&w=2070",
+        features: suggestion.features,
+        distanceMiles: 0.5 // Default distance
+      });
+
+      // Award 5 points to the user who submitted the suggestion
+      await this.updateUserPoints(suggestion.userId, 5);
+      
+      console.log(`Added approved location: ${suggestion.name}`);
+    }
+
+    return updatedSuggestion;
+  }
+}
+
+// Import necessary Drizzle functions
+import { db } from './db';
+import { eq, and, or, desc, sql } from 'drizzle-orm';
+
+// Use the database storage implementation
+export const storage = new DatabaseStorage();
