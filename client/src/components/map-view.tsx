@@ -157,8 +157,16 @@ export default function MapView({ locations, isLoading = false }: MapViewProps) 
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         
-        {/* User location marker */}
-        <Marker position={position}>
+        {/* User location marker - with custom icon */}
+        <Marker 
+          position={position}
+          icon={L.divIcon({
+            className: "user-location-marker",
+            html: `<div style="background-color: #007AFF; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 0 10px rgba(0,0,0,0.5);"></div>`,
+            iconSize: [22, 22],
+            iconAnchor: [11, 11]
+          })}
+        >
           <Popup>
             Your current location
           </Popup>
