@@ -45,7 +45,9 @@ export const signInWithGoogle = async () => {
       getIdToken: () => Promise.resolve("mock-token"),
       reload: () => Promise.resolve(),
       delete: () => Promise.resolve(),
-      toJSON: () => ({})
+      toJSON: () => ({}),
+      // Add custom property for our app
+      id: 1
     };
     
     return mockUser as User;

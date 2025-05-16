@@ -1,6 +1,15 @@
 import React, { createContext, useContext, useState } from 'react';
-import { User } from 'firebase/auth';
+import { User as FirebaseUser } from 'firebase/auth';
 import { signInWithGoogle, signOutUser } from '@/lib/firebase';
+
+// App user type
+interface User {
+  id: number;
+  uid: string;
+  displayName: string | null;
+  email: string | null;
+  photoURL: string | null;
+}
 
 interface AuthContextType {
   user: User | null;
@@ -18,10 +27,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const signIn = async () => {
     try {
       setIsLoading(true);
-      const user = await signInWithGoogle();
-      setUser(user);
+      const firebaseUser = await signInWithGoogle();
+      
+      // Create app user with our simplified structure
+      if (firebaseUser) {
+        // For demo purposes, assign ID 1 to the signed-in user
+        // In a real app, this would be retrieved from the database
+        const appUser: User = {
+          id: 1,
+          uid: firebaseUser.uid,
+          displayName: firebaseUser.displayName,
+          email: firebaseUser.email,
+          photoURL: firebaseUser.photoURL
+        };
+        
+        setUser(appUser);
+        setIsLoading(false);
+        return appUser;
+      }
+      
       setIsLoading(false);
-      return user;
+      return null;
     } catch (error) {
       console.error('Error signing in:', error);
       setIsLoading(false);

@@ -37,7 +37,7 @@ export default function Detail() {
     queryKey: [`/api/users/${userId}/locations/${id}/review`],
     retry: 1,
     enabled: !!user // Only run this query if user is logged in
-  });
+  }) || { hasReview: false, review: null };
   
   const isFavorite = favoriteData?.isFavorite || false;
   
@@ -194,6 +194,35 @@ export default function Detail() {
             </Map>
           )}
         </div>
+      </div>
+      
+      {/* Reviews section */}
+      <div className="px-4 py-2">
+        <h3 className="font-semibold mb-2">Reviews</h3>
+        
+        {/* Add review form if user is logged in and hasn't already reviewed */}
+        {user ? (
+          userReviewData?.hasReview ? (
+            <div className="mb-4 p-3 bg-primary/10 rounded-lg">
+              <p className="text-sm text-primary">
+                You've already reviewed this location. You can edit your review below.
+              </p>
+            </div>
+          ) : (
+            <div className="mb-4">
+              <ReviewForm locationId={parseInt(id)} />
+            </div>
+          )
+        ) : (
+          <div className="mb-4 p-3 bg-muted rounded-lg">
+            <p className="text-center text-sm">
+              Sign in to leave a review for this location
+            </p>
+          </div>
+        )}
+        
+        {/* Display reviews */}
+        <ReviewList locationId={parseInt(id)} />
       </div>
       
       {/* Action buttons */}
