@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { Switch } from "@/components/ui/switch";
-import { Label } from "@/components/ui/label";
-import { Slider } from "@/components/ui/slider";
 import LocationHeader from "@/components/location-header";
 import { useAuth } from "@/contexts/AuthContext";
 import { FiLogIn, FiLogOut, FiUser } from "react-icons/fi";
+import { Settings, Shield } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
 
 // Settings that would be stored in local storage in a real app
 interface AccessibilitySettings {

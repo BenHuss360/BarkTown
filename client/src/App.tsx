@@ -10,6 +10,8 @@ import Saved from "@/pages/saved";
 import Profile from "@/pages/profile";
 import Detail from "@/pages/detail";
 import SuggestLocation from "@/pages/suggest";
+import Settings from "@/pages/settings";
+import Admin from "@/pages/admin";
 import AccessibilityPanel from "@/components/accessibility-panel";
 import StatusBar from "@/components/status-bar";
 import AppNavigation from "@/components/app-navigation";
@@ -48,7 +50,8 @@ function App() {
                 <Route path="/profile" component={Profile} />
                 <Route path="/location/:id" component={Detail} />
                 <Route path="/suggest" component={SuggestLocation} />
-                <Route path="/admin" component={NotFound} />
+                <Route path="/settings" component={Settings} />
+                <Route path="/admin" component={Admin} />
                 <Route component={NotFound} />
               </Switch>
             </main>

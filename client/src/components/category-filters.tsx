@@ -20,7 +20,7 @@ export default function CategoryFilters({
   ];
   
   return (
-    <div className="flex overflow-x-auto hide-scrollbar whitespace-nowrap pb-2 gap-3">
+    <div className="flex overflow-x-auto hide-scrollbar whitespace-nowrap pb-2 gap-3 px-4" style={{ WebkitOverflowScrolling: 'touch', paddingLeft: '1rem', paddingRight: '1rem' }}>
       {categories.map((category) => {
         const isSelected = selectedCategory === category.id || (category.id === "all" && selectedCategory === null);
         

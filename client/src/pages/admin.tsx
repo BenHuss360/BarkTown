@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
+import { ShieldCheck } from "lucide-react";
 
 // Admin users - in a real app, this would come from a database with roles
 const ADMIN_IDS = [1, 2]; // Example admin user IDs
@@ -70,7 +71,7 @@ export default function AdminPage() {
           <div className="text-center mb-6">
             <h2 className="text-xl font-bold mb-2">Access Denied</h2>
             <p className="text-gray-600 dark:text-gray-400 mb-4">
-              You don't have permission to access the admin panel.
+              You don't have permission to access the admin panel. User ID 1 has admin access in the demo.
             </p>
             <Button onClick={() => navigate("/")}>
               Return to Home
@@ -86,7 +87,23 @@ export default function AdminPage() {
       <LocationHeader title="Admin Panel" onAccessibilityClick={() => {}} />
       
       <div className="flex-1 px-4 py-4 overflow-y-auto">
-        <h2 className="text-xl font-bold mb-4">Manage Location Suggestions</h2>
+        <div className="flex items-center gap-3 mb-4">
+          <div className="bg-primary/10 p-2 rounded-full">
+            <ShieldCheck className="h-6 w-6 text-primary" />
+          </div>
+          <h2 className="text-xl font-bold">Manage Suggestions</h2>
+        </div>
+        
+        {/* Instructions */}
+        <div className="bg-blue-50 dark:bg-blue-900/20 p-4 rounded-lg mb-4">
+          <h3 className="font-medium text-blue-700 dark:text-blue-300 mb-2">Admin Instructions</h3>
+          <ul className="text-sm text-gray-600 dark:text-gray-300 space-y-1 list-disc pl-5 mb-2">
+            <li>Review new location suggestions submitted by users</li>
+            <li>Approve quality submissions to add them to the app</li>
+            <li>Reject submissions that don't meet guidelines</li>
+            <li>Users earn 5 paw points for each approved submission</li>
+          </ul>
+        </div>
         
         {/* Tabs for filtering suggestions */}
         <Tabs defaultValue="pending" onValueChange={setActiveTab} className="mb-4">
